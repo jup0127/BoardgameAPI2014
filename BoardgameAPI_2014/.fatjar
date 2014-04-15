@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Mon Mar 10 14:49:04 KST 2014
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=false
+onejar.checkbox=false
+jarname=api2014v1.1.jar
+manifest.mergeall=false
+manifest.mainclass=
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=<jar|android.jar>
+includes=
