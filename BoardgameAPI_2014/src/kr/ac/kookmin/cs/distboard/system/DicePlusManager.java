@@ -52,6 +52,7 @@ public class DicePlusManager {
 				DiceController.connect(die);
 			}
 		}
+		
 
 		@Override
 		public synchronized void onScanStarted() {
