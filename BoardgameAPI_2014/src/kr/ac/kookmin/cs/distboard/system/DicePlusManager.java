@@ -145,7 +145,7 @@ public class DicePlusManager {
 				scaned.remove(die);
 				BluetoothManipulator.startScan();
 			}else if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME && initialized == true){//게임중에 끊겼다면
-			    Log.i(TAG, "게임중일때 DICE+ 접속 끊김.");
+			    Log.e(TAG, "게임중일때 DICE+ 접속 끊김.");
 			}
 			//BluetoothManipulator.startScan();
 		}
