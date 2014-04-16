@@ -2,7 +2,7 @@ package kr.ac.kookmin.cs.distboard.controller;
 
 
 import kr.ac.kookmin.cs.distboard.Player;
-import kr.ac.kookmin.cs.distboard.protocol.GameToolData;
+import kr.ac.kookmin.cs.distboard.subobject.GameToolData;
 
 
 public class GameToolAdapter implements GameToolListener{

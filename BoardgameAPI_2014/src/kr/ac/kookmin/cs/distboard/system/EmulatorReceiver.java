@@ -3,7 +3,7 @@ package kr.ac.kookmin.cs.distboard.system;
 import java.util.List;
 
 import kr.ac.kookmin.cs.distboard.DistributedBoardgame;
-import kr.ac.kookmin.cs.distboard.protocol.GameToolData;
+import kr.ac.kookmin.cs.distboard.subobject.GameToolData;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;

@@ -146,17 +146,7 @@ public class Mediator{
 		activateActivityAs(intent);//액티비티가 연결 코드 호출
 		
 	}
-	
-	//system default
-	public void wait(Player player, boolean onUI){
-		//UI
-	}
-	
-	//system default
-	public void wait(GameTool gameTool, boolean onUI){
-		//UI
-	}
-	
+
 	public void leave(){
 		
 	}

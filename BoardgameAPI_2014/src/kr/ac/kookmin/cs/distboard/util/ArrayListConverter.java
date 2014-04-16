@@ -2,7 +2,7 @@ package kr.ac.kookmin.cs.distboard.util;
 
 import java.util.ArrayList;
 
-import kr.ac.kookmin.cs.distboard.protocol.GameToolData;
+import kr.ac.kookmin.cs.distboard.subobject.GameToolData;
 
 import us.dicepl.android.sdk.Die;
 import android.bluetooth.BluetoothDevice;
