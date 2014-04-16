@@ -106,6 +106,7 @@ public class CommunicationStateManager {
 	
 	
 	public void onReconnected(BluetoothDevice device){
+	    SubjectDeviceMapper.getInstance().replaceClientDevice(device);
 		RequestReplyManager.getInstance().sendRequest((Player)SubjectDeviceMapper.getInstance().map(device), Request.OK_TO_RESUME, null);
 		Mediator.getParticipantListener().onPlayerRejoin((Player)(SubjectDeviceMapper.getInstance().map(device)));
 	}

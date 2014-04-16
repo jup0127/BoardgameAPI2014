@@ -188,7 +188,7 @@ public class SubjectDeviceMapper {
 		}
 	}
 	
-	//맵퍼가 등록하지 못하도록
+	//구성중에 맵퍼가 등록하지 못하도록
 	public void lostPlayer(){
 	    clientDevices = null;
 	}
@@ -200,6 +200,38 @@ public class SubjectDeviceMapper {
 	public void lostElectricYut(){
 	    dice = null;
 	}
+	
+	//게임중 인스턴스 바뀌었을 때
+	public void replaceClientDevice(BluetoothDevice replaceDevice){//대체할 디바이스
+	    for(int i = 0 ; i < clientDevices.length ; i++){
+	        if(clientDevices[i].getAddress().equals(replaceDevice.getAddress())){
+	            Log.i(TAG, clientDevices[i].hashCode() + "가 " + replaceDevice.hashCode() + "로 대체됨");
+	            clientDevices[i] = replaceDevice;
+	            
+	            return;
+	        }
+	    }
+	}
+	
+	public void replaceDie(Die replaceDie){
+	    for(int i = 0 ; i < dice.length ; i++){
+            if(dice[i].getAddress().equals(replaceDie.getAddress())){
+                Log.i(TAG, dice[i].hashCode() + "가 " + replaceDie.hashCode() + "로 대체됨");
+                dice[i] = replaceDie;
+                return;
+            }
+        }
+	}
+	
+	public void replaceYutDevice(BluetoothDevice replaceYutDevice){
+        for(int i = 0 ; i < yutDevices.length ; i++){
+            if(yutDevices[i].getAddress().equals(replaceYutDevice.getAddress())){
+                Log.i(TAG, yutDevices[i].hashCode() + "가 " + replaceYutDevice.hashCode() + "로 대체됨");
+                yutDevices[i] = replaceYutDevice;
+                return;
+            }
+        }
+    }
 	
 	//called by mediator
 	

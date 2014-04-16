@@ -33,9 +33,12 @@ public class BluetoothManager {// 싱글톤
 
 	private static BluetoothManager instance = new BluetoothManager();
 
+	
+	
 	private final static String TAG = "20083271:BluetoothManager";
-	private final static boolean PRINT_DEBUG_STATUS = true;
-
+	private final static boolean PRINT_DEBUG_STATUS = false;
+	private static int total_connection_id_for_debug = 0;
+	
 	private boolean initialized = false;// 모드가 초기화 되었는지
 
 	private Mode mode = Mode.NONE;// 블루투스 매니저의 작동 모드(호스트 vs 클라이언트)
@@ -101,7 +104,7 @@ public class BluetoothManager {// 싱글톤
 
 		mAdapter = BluetoothAdapter.getDefaultAdapter();
 		instance.initialized = true;
-
+		total_connection_id_for_debug = 0;
 		/*mReceiver = new BroadcastReceiver() {//등록된 이후로 리시브 시작! - 쌍으로 주석 풀 것
 			public void onReceive(Context context, Intent intent) {
 				String action = intent.getAction();
@@ -667,6 +670,7 @@ public class BluetoothManager {// 싱글톤
 			Log.i(TAG, "다시 기다림 : " + device.getName());
 			
 			try {
+			    socket.close();
                 mAcceptThread.accept(connectIndex);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -677,10 +681,13 @@ public class BluetoothManager {// 싱글톤
 		}
 		
 		mConnectedThreads.add(new ConnectedRemoteAndroidThread(socket, connectIndex));
+		mConnectedThreads.get(mConnectedThreads.size() - 1).start();
 		lostClientDevices.remove(device);
 		lostIndexes.remove((Object)connectIndex);
 		
 		
+		Log.d(TAG, "CommunicationStateManager.getInstance().onReconnected(device) 호출 직전");
+        printBluetoothManagerStatusLog();
 		CommunicationStateManager.getInstance().onReconnected(device);
 		
 	}
@@ -770,9 +777,12 @@ public class BluetoothManager {// 싱글톤
 	    	hasClientsPerfectlyNominated = false;
 	    	
 	    	index = mConnectedThreads.indexOf(connectedThread);
+	    	//Log.e(TAG, "연결 끊어진 index : " + index + " " +  mConnectedThreads.get(index).getRemoteDevice().getName());
 	       	mConnectedThreads.get(index).cancel();
 	       	mConnectedThreads.remove(index);//이것의 차이 -
 	       	
+	       	Log.d(TAG, "연결 끊어진 이후에 상태는 : ");
+	       	printBluetoothManagerStatusLog();
 	       	//Log.d(TAG, "연결이 끊어짐 : 호스트 수락 인덱스 회귀 :" + connectIndexAsClient);
 	       	//mAcceptThread.setCurrentAcceptIndex(connectIndexAsClient);//인덱스 회귀해서 다시 기다림
 	       	
@@ -797,6 +807,11 @@ public class BluetoothManager {// 싱글톤
 	    		
 	    		Log.d(TAG , "호스트 게임중 상태에서 연결 끊어짐");
 	    		totalCurrentClients--;//현재 접속된 클라이언트 총합 변경
+	    		
+	    		index = mConnectedThreads.indexOf(connectedThread);
+	            mConnectedThreads.get(index).cancel();
+	            mConnectedThreads.remove(index);
+	    		
 	    		lostClientDevices.add(connectedThread.getRemoteDevice());//잃어버린 장치 추가
 	    		lostIndexes.add(connectedThread.getConnectIndex());
 	    		
@@ -1037,10 +1052,13 @@ public class BluetoothManager {// 싱글톤
 	
 	private class ConnectedRemoteAndroidThread extends ConnectedThread {
 
+	    
 		private static final String TAG = "20083271:ConnectedRemoteAndroidThread";
 
+		private int debug_object_id = 0;
 		private int connectIndex = -1;
 		// private BluetoothDevice mmDevice;
+		private BluetoothDevice remoteDevice = null;
 		private BluetoothSocket mmSocket;
 
 		private ObjectInputStream mmInStream;
@@ -1048,8 +1066,10 @@ public class BluetoothManager {// 싱글톤
 
 		public ConnectedRemoteAndroidThread(BluetoothSocket socket, int connectIndex) {
 			Log.d(TAG, "원격 안드로이드 연결된 스레드 생성자");
-			// mmDevice = device;
+			debug_object_id = total_connection_id_for_debug++;
+			Log.d(TAG, "생성자 호출시 id : " + debug_object_id);
 			mmSocket = socket;
+			this.remoteDevice = socket.getRemoteDevice();
 			this.connectIndex = connectIndex;
 			ObjectInputStream tmpIn = null;
 			ObjectOutputStream tmpOut = null;
@@ -1080,7 +1100,8 @@ public class BluetoothManager {// 싱글톤
 					CommunicationStateManager.getInstance().onObjectDelivered(mmSocket.getRemoteDevice(),mmInStream.readObject());
 
 				} catch (IOException e) {
-					Log.e(TAG, "연결 끊어짐", e);
+					Log.w(TAG, "연결 끊어짐", e);
+					Log.d(TAG, "연결 끊어진 id : " + debug_object_id);
 					this.cancel();
 					onConnectionLost(this);// 연결 끊어지면... 실행
 					break;
@@ -1095,7 +1116,6 @@ public class BluetoothManager {// 싱글톤
 			try {
 			    
 			    synchronized (obj){
-			        mmOutStream.flush();
 			        mmOutStream.writeObject(obj);
 			        mmOutStream.flush();
 			    }
@@ -1108,30 +1128,35 @@ public class BluetoothManager {// 싱글톤
 		}
 
 		public void cancel() {
+		    
 			try {
 			    if(mmSocket != null){
 			        mmSocket.close();
 				    mmSocket = null;
 			    }
-			    if(mmInStream != null){
+			    /*if(mmInStream != null){
 			        mmInStream.close();
-			        mmOutStream.close();
 			        mmInStream = null;
-			        mmOutStream = null;
 			    }
+			    
+			    if( mmOutStream != null){
+			        mmOutStream.close();
+			        mmOutStream = null;
+			    }*/
 			} catch (IOException e) {
 				Log.e(TAG, "close() of connect socket failed", e);
 			}
+			
 		}
 
 		@Override
 		public BluetoothDevice getRemoteDevice() {
 			
-			return mmSocket.getRemoteDevice();
+			return remoteDevice;
 		}
 		
 		public int getConnectIndex(){
-			Log.d(TAG, "getConnectIndex 호출됨" + mmSocket.getRemoteDevice().getName() + "의 연결 인덱스는 : " + connectIndex);
+		    Log.i(TAG, "커넥트 인덱스 : " + connectIndex);
 			return connectIndex;
 		}
 	}
