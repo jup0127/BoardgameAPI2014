@@ -63,7 +63,7 @@ public class GameToolSystemManager {
 	
 	//
 	public void onDicePlusRoll(Die die, RollData rollData){//rollData안에는 많은 정보가 포함되어있다.
-		if(DistributedBoardgame.getInstance().setGetDieValueAtOnce() == false){//한번에 처리해야되는 상황이 아니면
+		if(DistributedBoardgame.getInstance().isGetDieValuesAtOnce() == false){//한번에 처리해야되는 상황이 아니면
 			//바로 보고
 			GameTool.getGameToolListener().onDiceRoll(null, new GameToolData(rollData.face, null));
 		}else{//한번에 처리해야되는 상황이면
@@ -110,7 +110,7 @@ public class GameToolSystemManager {
 		Log.i(TAG, "리모트 가상 주사위 굴려짐 주사위 길이는: " + face.length);
 		//클라이언트에서 온거니까(호스트 일 수도 있어)
 		//적절히 처리후 게임툴 리스너 작동
-		if(DistributedBoardgame.getInstance().setGetDieValueAtOnce() == false){//한번에 처리해야되는 상황이 아니면
+		if(DistributedBoardgame.getInstance().isGetDieValuesAtOnce() == false){//한번에 처리해야되는 상황이 아니면
 			//바로 보고
 			Log.d(TAG, "따로 처리하는 상황");
 			for(int i = 0 ; i < face.length ; i++){

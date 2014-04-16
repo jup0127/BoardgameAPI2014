@@ -171,16 +171,6 @@ public class DistributedBoardgame {//singleton
 	
 	//한번에 처리해서 리스너로 보낼지
 
-	/**
-	 * 주사위의 굴려짐 이벤트를 초기화에 명세한 주사위 개수만큼 모였을 때 처리할 지 결정합니다.
-	 * 만약 인자의 값이 'true'라면 모든 주사위가 굴려졌을때 이벤트에대한 리스너가 동작합니다.
-	 * 만약 인자의 값이 'false'라면 주사위 하나가 굴려질 때 마다 이벤트에대한 리스너가 동작합니다.
-	 * @param diceAtOnce 주사위의 굴려짐 이벤트를 한번에 처리할지의 여부
-	 */
-	public void setDiceAtOnce(boolean diceAtOnce) {
-		this.diceAtOnce = diceAtOnce;
-	}
-
 	
 	/**
 	 * 아직 지원하지 않는 메소드
@@ -291,47 +281,107 @@ public class DistributedBoardgame {//singleton
 		return mode;
 	}
 	
+	/**
+	 * 개발자가 호출하지 않습니다.
+	 * @param mode
+	 */
 	public void setMode(Mode mode){
 		this.mode = mode;
 	}
 	
-	public boolean setGetDieValueAtOnce(){
-		return diceAtOnce;
+	/**
+     * 주사위의 굴려짐 이벤트를 초기화에 명세한 주사위 개수만큼 모였을 때 처리할 지 결정합니다.
+     * 만약 인자의 값이 'true'라면 모든 주사위가 굴려졌을때 이벤트에대한 리스너가 동작합니다.
+     * 만약 인자의 값이 'false'라면 주사위 하나가 굴려질 때 마다 이벤트에대한 리스너가 동작합니다.
+     * @param diceAtOnce 주사위의 굴려짐 이벤트를 한번에 처리할지의 여부
+     */
+	public void setGetDieValueAtOnce(boolean diceAtOnce){
+		this.diceAtOnce = diceAtOnce;
 	}
 	
-	public boolean setGetYutValuesAtOnce(){
-		return yutsAtOnce;
+	/**
+	 * 아직 지원하지 않는 메서드
+	 * 
+     * 주사위의 굴려짐 이벤트를 초기화에 명세한 주사위 개수만큼 모였을 때 처리할 지 결정합니다.
+     * 만약 인자의 값이 'true'라면 모든 주사위가 굴려졌을때 이벤트에대한 리스너가 동작합니다.
+     * 만약 인자의 값이 'false'라면 주사위 하나가 굴려질 때 마다 이벤트에대한 리스너가 동작합니다.
+     * @param yutsAtOnce 주사위의 굴려짐 이벤트를 한번에 처리할지의 여부
+     */
+	public void setGetYutValuesAtOnce(boolean yutsAtOnce){
+		this.yutsAtOnce = yutsAtOnce;
 	}
 
+	public boolean isGetDieValuesAtOnce(){
+	    return diceAtOnce;
+	}
+	
+	public boolean isGetYutValuesAtOnce(){
+	    return yutsAtOnce;
+	}
+	
+	/**
+	 * 개발자가 호출하지 않습니다.
+	 * 
+	 * 중재자를 반환합니다.
+	 * @return 중재자
+	 */
 	public Mediator getMediator() {
 		return mediator;
 	}
 
+	/**
+	 * DicePlusGameTool 배열을 반환합니다.
+	 * @return DicePlusGameTool 배열
+	 */
 	public DicePlusGameTool[] getDicePlusGameTools() {
 		return dicePlusGameTools;
 	}
 
+	/**
+	 * YutGameTool 배열을 반환합니다.
+	 * @return YutGameTool 배열
+	 */
 	public YutGameTool[] getYutGameTools() {
 		return yutGameTools;
 	}
 
+	/**
+	 * 호스트 장치를 추상화한 플레이어를 얻습니다.
+	 * 호스트가 이 메서드를 호출하면 getThisPlayer() 메서드를 호출한 것과 같은 결과를 가져옵니다.
+	 * 모드가 호스트 또는 클라이언트가 아니라면 null을 반환합니다.
+	 * @return 호스트 장치를 추상화한 플레이어
+	 */
 	public Player getHost() {
-		if(mode != Mode.CLIENT){
-			Log.w(TAG, "클라이언트만이 getHost()를 호출할 수 있습니다. null을 리턴합니다.");
-			return null;
+		if(mode == Mode.HOST){//호스트
+			return getMe();
+		}else if(mode == Mode.CLIENT){
+		    return players[0];
 		}
-		return players[0];
+		return null;
 	}
 	
+	/**
+	 * 플레이어 배열을 얻습니다.
+	 * 클라이언트가 이 메서드를 호출하면 호스트 플레이어 하나로 이루어진 배열을 반환합니다.
+	 * @return 플레이어 배열
+	 */
 	public Player[] getPlayers() {
 		return players;
 	}
 	
+	/**
+	 * Dice+ 전자 게임도구들이 사용 가능한지의 여부를 반환합니다.
+	 * @return Dice+ 전자 게임도구들이 사용 가능한지의 여부
+	 */
 	public boolean isDicePlusAvailable(){
 		//available한지 
 		return dicePlusGameTools.length != 0 ?  true : false;
 	}
 	
+	/**
+	 * Ibar 전자 게임도구들이 사용 가능한지의 여부를 반환합니다.
+	 * @return Ibar 전자 게임도구들이 사용 가능한지의 여부
+	 */
 	public boolean isElectricYutAvailable(){
 		//available한지 
 		return yutGameTools.length != 0 ?  true : false;
