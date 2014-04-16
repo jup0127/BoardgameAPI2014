@@ -1081,6 +1081,7 @@ public class BluetoothManager {// ½Ì±ÛÅæ
 
 				} catch (IOException e) {
 					Log.e(TAG, "¿¬°á ²÷¾îÁü", e);
+					this.cancel();
 					onConnectionLost(this);// ¿¬°á ²÷¾îÁö¸é... ½ÇÇà
 					break;
 				} catch (ClassNotFoundException e) {
@@ -1109,6 +1110,7 @@ public class BluetoothManager {// ½Ì±ÛÅæ
 		public void cancel() {
 			try {
 				mmSocket.close();
+				mmSocket = null;
 			} catch (IOException e) {
 				Log.e(TAG, "close() of connect socket failed", e);
 			}
