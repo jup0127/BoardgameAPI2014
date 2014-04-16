@@ -211,6 +211,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
         //ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         //activityManager.restartPackage("com.wwforever.eclipsebuildunity3d");
         //Log.i(TAG, "끄기 완료?!");
+        
     }
 	
 	public synchronized void clear(){
