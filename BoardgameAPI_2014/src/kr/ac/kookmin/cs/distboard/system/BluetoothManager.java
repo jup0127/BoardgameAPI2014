@@ -1109,8 +1109,16 @@ public class BluetoothManager {// ΩÃ±€≈Ê
 
 		public void cancel() {
 			try {
-				mmSocket.close();
-				mmSocket = null;
+			    if(mmSocket != null){
+			        mmSocket.close();
+				    mmSocket = null;
+			    }
+			    if(mmInStream != null){
+			        mmInStream.close();
+			        mmOutStream.close();
+			        mmInStream = null;
+			        mmOutStream = null;
+			    }
 			} catch (IOException e) {
 				Log.e(TAG, "close() of connect socket failed", e);
 			}
