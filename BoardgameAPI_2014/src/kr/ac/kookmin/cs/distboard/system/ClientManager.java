@@ -29,9 +29,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-public class BluetoothManager {// 싱글톤
+public class ClientManager {// 싱글톤
 
-	private static BluetoothManager instance = new BluetoothManager();
+	private static ClientManager instance = new ClientManager();
 
 	
 	
@@ -89,12 +89,12 @@ public class BluetoothManager {// 싱글톤
 	
 	// 호스트-클라이언트
 	// 생성자
-	private BluetoothManager() {
+	private ClientManager() {
 	}
 
 	// 호스트-클라이언트
 	// 초기화 된 블루투스매니저의 인스턴스를 얻습니다.
-	public static BluetoothManager getInstance() {
+	public static ClientManager getInstance() {
 		return instance;
 	}
 
@@ -910,7 +910,7 @@ public class BluetoothManager {// 싱글톤
 		}
 		
 		public void accept(int currentIndex) throws IOException{
-			synchronized (BluetoothManager.this) {	//결국 메서드에 sync 하는것도 똑같을듯.
+			synchronized (ClientManager.this) {	//결국 메서드에 sync 하는것도 똑같을듯.
 				Log.i(TAG, "현재의 수락중 인덱스 : " + currentIndex);
 				mmServerSocket = mAdapter.listenUsingRfcommWithServiceRecord("BluetoothManagerIn?secure", uuids.get(currentIndex));
 				BluetoothSocket socket = null;
@@ -996,7 +996,7 @@ public class BluetoothManager {// 싱글톤
 			Log.i(TAG, "BEGIN mConnectThread");
 
 			try {
-				synchronized (BluetoothManager.this) {
+				synchronized (ClientManager.this) {
 					mmSocket.connect();
 				}
 			} catch (IOException e) {
@@ -1007,7 +1007,7 @@ public class BluetoothManager {// 싱글톤
 					Log.e(TAG, "unable to close() " + " socket during connection failure", e2);
 				}
 				// ////////////////////////////
-				synchronized (BluetoothManager.this) {
+				synchronized (ClientManager.this) {
 					Log.i(TAG, "connect fail " + connectIndex + " " + e);
 					onConnectionFailed(this);// 연결 시도하다가 실패
 					reportSuccessOrFail(connectIndex, ConnectRemoteAndroidThread.CONNECT_FAIL);
@@ -1016,7 +1016,7 @@ public class BluetoothManager {// 싱글톤
 				return;
 			}
 
-			synchronized (BluetoothManager.this) {
+			synchronized (ClientManager.this) {
 				Log.i(TAG, "연결 성공, 인덱스: " + connectIndex);
 				
 				//나중에 재합류할 때 사용할 정보 저장

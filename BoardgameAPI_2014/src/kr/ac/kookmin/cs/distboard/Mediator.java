@@ -6,7 +6,7 @@ import kr.ac.kookmin.cs.distboard.controller.ParticipantListener;
 import kr.ac.kookmin.cs.distboard.enumeration.Mode;
 import kr.ac.kookmin.cs.distboard.subobject.DicePlusGameTool;
 import kr.ac.kookmin.cs.distboard.subobject.YutGameTool;
-import kr.ac.kookmin.cs.distboard.system.BluetoothManager;
+import kr.ac.kookmin.cs.distboard.system.ClientManager;
 import kr.ac.kookmin.cs.distboard.system.DicePlusManager;
 import kr.ac.kookmin.cs.distboard.system.ElectricYutManager;
 import kr.ac.kookmin.cs.distboard.system.SubjectDeviceMapper;
@@ -110,8 +110,8 @@ public class Mediator{
 		}
 		
 		//블루투스 매니저 접근
-		BluetoothManager.getInstance().initialize(Mode.HOST, maxPlayers, exactElectricGameToolYut, hostPrepareTimeout);
-		BluetoothManager.getInstance().establish();
+		ClientManager.getInstance().initialize(Mode.HOST, maxPlayers, exactElectricGameToolYut, hostPrepareTimeout);
+		ClientManager.getInstance().establish();
 
 		//다이스 플러스 매니저 접근
 		DicePlusManager.getInstance().establish(exactElectricGameToolDicePlus, hostPrepareTimeout);
@@ -132,7 +132,7 @@ public class Mediator{
 	
 	private void join(){
 		Log.d(TAG, "클라이언트 합류 입장");
-		BluetoothManager.getInstance().initialize(Mode.CLIENT, maxPlayers, exactElectricGameToolYut, hostPrepareTimeout);
+		ClientManager.getInstance().initialize(Mode.CLIENT, maxPlayers, exactElectricGameToolYut, hostPrepareTimeout);
 		DistributedBoardgame.getInstance().setState(DistributedBoardgame.CLIENT_JOIN_MODE);
 		
 		//블루투스 매니저 접근

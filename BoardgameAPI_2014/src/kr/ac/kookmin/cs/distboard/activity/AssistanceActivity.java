@@ -9,7 +9,7 @@ import kr.ac.kookmin.cs.distboard.Mediator;
 import kr.ac.kookmin.cs.distboard.enumeration.Mode;
 import kr.ac.kookmin.cs.distboard.protocol.Request;
 import kr.ac.kookmin.cs.distboard.protocol.RequestReplyManager;
-import kr.ac.kookmin.cs.distboard.system.BluetoothManager;
+import kr.ac.kookmin.cs.distboard.system.ClientManager;
 import kr.ac.kookmin.cs.distboard.system.DicePlusManager;
 import kr.ac.kookmin.cs.distboard.system.ElectricYutManager;
 import kr.ac.kookmin.cs.distboard.util.ArrayListConverter;
@@ -309,7 +309,7 @@ public class AssistanceActivity extends Activity {
                 Log.d(TAG, "온 클릭 플레이어 강제구성");
 
                 if (DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE) {
-                    BluetoothManager.getInstance().forceClientEstablishment();
+                    ClientManager.getInstance().forceClientEstablishment();
                 }
                 // AssistanceActivity.this.finish();
             }
@@ -429,7 +429,7 @@ public class AssistanceActivity extends Activity {
 		
 		
 		Log.d(TAG, "블루투스 매니저에게 장치 검색 요청 시작");
-		discoveredDevices = ArrayListConverter.bluetoothDeviceArrayToArrayList(BluetoothManager.getInstance().getDiscoveredDevices());//블루투스 매니저 최초 초기화 지점
+		discoveredDevices = ArrayListConverter.bluetoothDeviceArrayToArrayList(ClientManager.getInstance().getDiscoveredDevices());//블루투스 매니저 최초 초기화 지점
 		
 		Log.d(TAG, "블루투스 매니저에게 장치 검색 요청 완료");
 		for(int i = 0 ; i < discoveredDevices.size() ; i++){
@@ -451,7 +451,7 @@ public class AssistanceActivity extends Activity {
 					//tempTextView.setText("연결중...");
 					//setContentView(tempTextView);
 					
-					BluetoothManager.getInstance().connect(discoveredDevices.get(playerButtons.indexOf(button)));
+					ClientManager.getInstance().connect(discoveredDevices.get(playerButtons.indexOf(button)));
 					//AssistanceActivity.this.finish();
 				}
 			});
@@ -707,7 +707,7 @@ public class AssistanceActivity extends Activity {
 			public void onClick(View button) {
 				Log.d(TAG, "온 클릭 접속중");
 				Toast.makeText(AssistanceActivity.this, "연결중..", Toast.LENGTH_LONG).show();
-				BluetoothManager.getInstance().connect(discoveredDevices.get(playerButtons.indexOf(button)));
+				ClientManager.getInstance().connect(discoveredDevices.get(playerButtons.indexOf(button)));
 				//AssistanceActivity.this.finish();
 			}
 		});

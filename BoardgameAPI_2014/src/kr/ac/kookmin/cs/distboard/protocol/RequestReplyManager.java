@@ -9,7 +9,7 @@ import kr.ac.kookmin.cs.distboard.Player;
 import kr.ac.kookmin.cs.distboard.activity.AssistanceActivity;
 import kr.ac.kookmin.cs.distboard.subobject.DicePlusGameTool;
 import kr.ac.kookmin.cs.distboard.subobject.YutGameTool;
-import kr.ac.kookmin.cs.distboard.system.BluetoothManager;
+import kr.ac.kookmin.cs.distboard.system.ClientManager;
 import kr.ac.kookmin.cs.distboard.system.DicePlusManager;
 import kr.ac.kookmin.cs.distboard.system.ElectricYutManager;
 import kr.ac.kookmin.cs.distboard.system.EmulatorReceiver;
@@ -138,7 +138,7 @@ public class RequestReplyManager{
 		Log.i(TAG, SubjectDeviceMapper.getInstance().map(player).getName() + "으로 메시지를 송신");
 		Log.i(TAG, "송신되는 내용은 : 오브젝트 : " + request.content);
 		Log.i(TAG, "송신되는 내용은 : 코드 : " + request.code);
-		BluetoothManager.getInstance().write(SubjectDeviceMapper.getInstance().map(player), request);
+		ClientManager.getInstance().write(SubjectDeviceMapper.getInstance().map(player), request);
 		
 		
 	}
@@ -165,14 +165,14 @@ public class RequestReplyManager{
 	    
 		//나 인경우 포함하자.... ㄷㄷㄷ
 		Reply reply = Reply.getRequest(replyType, obj);
-		BluetoothManager.getInstance().write(SubjectDeviceMapper.getInstance().map(player), reply);
+		ClientManager.getInstance().write(SubjectDeviceMapper.getInstance().map(player), reply);
 	}
 
 	private boolean isAvaliable(Object obj){
 	    Log.i(TAG, "객체가 전송가능한 상태인지 검사");
 	    if(obj instanceof Player){
 	        Log.i(TAG, "객체(플레이어)가 전송가능한 상태인지 검사");
-	        return BluetoothManager.getInstance().isAvailableDevice(SubjectDeviceMapper.getInstance().map((Player)obj));
+	        return ClientManager.getInstance().isAvailableDevice(SubjectDeviceMapper.getInstance().map((Player)obj));
 	    }else if(obj instanceof GameTool){
 	        if(obj instanceof DicePlusGameTool){
 	            Log.i(TAG, "객체(DICE+)가 전송가능한 상태인지 검사");

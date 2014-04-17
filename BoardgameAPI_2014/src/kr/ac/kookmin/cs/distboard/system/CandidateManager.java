@@ -47,7 +47,6 @@ public class CandidateManager {
 	public synchronized void nominateDice(Die[] dice){
 		Log.d(TAG, "DICE+ 노미네이트");
 		
-		
 		if(instance.initialized == false){
 			Log.i(TAG, "초기화되지 않았습니다.");
 			return;

@@ -1,6 +1,6 @@
 package kr.ac.kookmin.cs.distboard.util;
 
-import kr.ac.kookmin.cs.distboard.system.BluetoothManager;
+import kr.ac.kookmin.cs.distboard.system.ClientManager;
 import kr.ac.kookmin.cs.distboard.system.DicePlusManager;
 import kr.ac.kookmin.cs.distboard.system.ElectricYutManager;
 import android.util.Log;
@@ -56,7 +56,7 @@ public class ThreadTimer extends Thread implements Runnable {
 				
 			case BLUETOOTH_MANAGER_ESTABLISH_CALL:
 				Log.i(TAG, "타이머 스레드 콜링타입 : 블루투스 콜");
-				BluetoothManager.getInstance().onEstablishTimeOut();
+				ClientManager.getInstance().onEstablishTimeOut();
 				break;
 				
 			case ELECTRIC_YUT_MANAGER_ESTABLISH_CALL:

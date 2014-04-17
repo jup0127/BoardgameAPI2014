@@ -11,7 +11,7 @@ import kr.ac.kookmin.cs.distboard.enumeration.Mode;
 import kr.ac.kookmin.cs.distboard.protocol.RequestReplyManager;
 import kr.ac.kookmin.cs.distboard.subobject.DicePlusGameTool;
 import kr.ac.kookmin.cs.distboard.subobject.YutGameTool;
-import kr.ac.kookmin.cs.distboard.system.BluetoothManager;
+import kr.ac.kookmin.cs.distboard.system.ClientManager;
 import kr.ac.kookmin.cs.distboard.system.CandidateManager;
 import kr.ac.kookmin.cs.distboard.system.DicePlusManager;
 import kr.ac.kookmin.cs.distboard.system.ElectricYutManager;
@@ -480,10 +480,12 @@ public class DistributedBoardgame {//singleton
 			instance.unregisterParticipantListener();
 			instance.unRegisterPlayerListener();
 			
-			DicePlusManager.getInstance().clear();
-			BluetoothManager.getInstance().clear();
-			ElectricYutManager.getInstance().clear();
-			EmulatorReceiver.getInstance().clear();
+			synchronized (this) {
+			    DicePlusManager.getInstance().clear();
+			    ClientManager.getInstance().clear();
+			    ElectricYutManager.getInstance().clear();
+			    EmulatorReceiver.getInstance().clear();
+			}
 			
 			initialized = false;
 			Log.i(TAG, "initialized : " + initialized);

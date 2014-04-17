@@ -11,7 +11,7 @@ import kr.ac.kookmin.cs.distboard.protocol.ObjectArgument;
 import kr.ac.kookmin.cs.distboard.protocol.Request;
 import kr.ac.kookmin.cs.distboard.protocol.RequestReplyManager;
 import kr.ac.kookmin.cs.distboard.subobject.Distracter;
-import kr.ac.kookmin.cs.distboard.system.BluetoothManager;
+import kr.ac.kookmin.cs.distboard.system.ClientManager;
 import kr.ac.kookmin.cs.distboard.system.EmulatorReceiver;
 import kr.ac.kookmin.cs.distboard.system.SubjectDeviceMapper;
 

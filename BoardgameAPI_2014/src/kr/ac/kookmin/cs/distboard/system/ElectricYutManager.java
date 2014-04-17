@@ -21,8 +21,8 @@ import kr.ac.kookmin.cs.distboard.DistributedBoardgame;
 import kr.ac.kookmin.cs.distboard.Mediator;
 import kr.ac.kookmin.cs.distboard.enumeration.DeviceType;
 import kr.ac.kookmin.cs.distboard.enumeration.Mode;
-import kr.ac.kookmin.cs.distboard.system.BluetoothManager.ConnectThread;
-import kr.ac.kookmin.cs.distboard.system.BluetoothManager.ConnectedThread;
+import kr.ac.kookmin.cs.distboard.system.ClientManager.ConnectThread;
+import kr.ac.kookmin.cs.distboard.system.ClientManager.ConnectedThread;
 import kr.ac.kookmin.cs.distboard.util.ArrayListConverter;
 import kr.ac.kookmin.cs.distboard.util.ThreadTimer;
 
