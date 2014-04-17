@@ -112,11 +112,10 @@ public class ElectricYutManager {
 			}
 
 			// 연결할 Dice+ 개수가 0개이면
-			if (exactElectricGameToolYut == 0) {
+			if (exactElectricGameToolYut == 0 || Mediator.getInstance().getMode() == Mode.CLIENT) {
 				// 보고 후 바로 리턴
 				hasPerfectlyNominated = true;
-				CandidateManager.getInstance().nominateYutDevices(
-						new BluetoothDevice[0]);
+				CandidateManager.getInstance().nominateYutDevices(new BluetoothDevice[0]);
 				// CommunicationStateManager.getInstance().onDicePlusEstablishComplete(new
 				// Die[0]);
 				return;

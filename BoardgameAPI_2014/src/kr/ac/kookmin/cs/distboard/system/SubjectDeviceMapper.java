@@ -363,7 +363,7 @@ public class SubjectDeviceMapper {
 	}
 	
 	public void setExactPlayers(int exactPlayers){
-	    
+	    this.exactPlayers = exactPlayers;
 	}
 
 	public void setExactYutGameTools(int exacetYutGameTools) {

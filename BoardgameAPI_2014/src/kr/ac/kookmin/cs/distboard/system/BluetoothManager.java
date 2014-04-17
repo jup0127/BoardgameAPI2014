@@ -646,8 +646,7 @@ public class BluetoothManager {// 싱글톤
 				hasClientsPerfectlyNominated = true;
 				
 				CandidateManager.getInstance().nominateClientDevices(getRemoteDevices());
-				CandidateManager.getInstance().nominateDice(new Die[0]);//얘가 보고하는게 좀 안맞긴해
-				CandidateManager.getInstance().nominateYutDevices(new BluetoothDevice[0]);//얘가 보고하는게 좀 안맞긴해
+				
 				
 				//CommunicationStateManager.getInstance().onConnectionComplete(device);
 			}

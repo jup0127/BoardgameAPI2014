@@ -204,9 +204,11 @@ public class DicePlusManager {
 				Log.e(TAG, "초기화 되지 않음");
 				return;
 			}
+			
+			
 
 			// 연결할 Dice+ 개수가 0개이면
-			if (exactElectricGameToolDicePlus == 0) {
+			if (exactElectricGameToolDicePlus == 0 || Mediator.getInstance().getMode() == Mode.CLIENT) {
 				// 보고 후 바로 리턴
 				hasPerfectlyNominated = true;
 				CandidateManager.getInstance().nominateDice(new Die[0]);
