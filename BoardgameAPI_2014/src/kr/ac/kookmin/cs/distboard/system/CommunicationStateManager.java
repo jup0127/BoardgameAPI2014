@@ -69,12 +69,7 @@ public class CommunicationStateManager {
 		ElectricYutManager.getInstance().setTimeouted();//2014년 4월 14일 추가됨 구성완료후 isTimeout를 "true"로 만들지 않았다.
 		
 		//호스트 경우 자기 액티비티 끄고 (클라이언트도 여기 들어오긴해..망할)
-		
-		Message message = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.COMPLETE_ACTIVITY);
-		RequestReplyManager.getInstance().sendRequestToAllPlayer(Request.OK_TO_GO, null);
-		message.sendToTarget();
-		
-		
+
 		//모두 끝나면 OK_TO_GO 각 클라이언트에게 전송
 	}
 	
@@ -233,6 +228,9 @@ public class CommunicationStateManager {
 			Message message = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.ESTABLISH_PLAYER_DISCONNECTED);
 			message.obj = device;
 			message.sendToTarget();
+			
+            Message message2 = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.GAME_IS_NOT_STARTABLE);
+            message2.sendToTarget();
 		}
 		//2. 클라이언트 합류중
 		else if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.CLIENT_JOIN_MODE){

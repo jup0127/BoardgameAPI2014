@@ -148,6 +148,7 @@ public class RequestReplyManager{
 		Log.d(TAG, "모든 플레이어에게 객체 전송 진입");
 		Player[] currentPlayers = DistributedBoardgame.getInstance().getPlayers();
 		
+		
 		for(int i = 0 ; i < currentPlayers.length ; i++){
 			Log.d(TAG, "플레이어 수 : " + currentPlayers.length);
 			if(currentPlayers[i] != null){//연결이 끊기지 않았다면

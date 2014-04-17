@@ -12,6 +12,7 @@ import kr.ac.kookmin.cs.distboard.protocol.RequestReplyManager;
 import kr.ac.kookmin.cs.distboard.system.ClientManager;
 import kr.ac.kookmin.cs.distboard.system.DicePlusManager;
 import kr.ac.kookmin.cs.distboard.system.ElectricYutManager;
+import kr.ac.kookmin.cs.distboard.system.SubjectDeviceMapper;
 import kr.ac.kookmin.cs.distboard.util.ArrayListConverter;
 import us.dicepl.android.sdk.Die;
 import android.app.Activity;
@@ -111,6 +112,8 @@ public class AssistanceActivity extends Activity {
 	public static final int NEW_DEVICE_DISCOVERED = 20;//새로운 장치 발견!
 	
 	public static final int COMPLETE_ACTIVITY = 21;
+	public static final int GAME_IS_STARTABLE = 22;//시작해도된다는!
+	public static final int GAME_IS_NOT_STARTABLE = 23;
 	
 	
 	//인스턴스 변수
@@ -123,7 +126,13 @@ public class AssistanceActivity extends Activity {
 	
 	//레이아웃
 	LinearLayout linear = null;
-	
+	LinearLayout linearClients = null;
+	LinearLayout linearClientsForce = null;
+	LinearLayout linearDice = null;
+	LinearLayout linearDiceForce = null;
+	LinearLayout linearYuts = null;
+	LinearLayout linearYutsForce = null;
+	LinearLayout linearStart = null;
 	
 	
 	//레이아웃:임시 인스턴스 변수
@@ -263,17 +272,32 @@ public class AssistanceActivity extends Activity {
 		activityMode = HOST_PREPARE_MODE;
 		
 		linear = new LinearLayout(this);
+		linearClients = new LinearLayout(this);
+		linearClientsForce = new LinearLayout(this);
+		linearDice = new LinearLayout(this);
+		linearDiceForce = new LinearLayout(this);
+		linearYuts = new LinearLayout(this);
+		linearYutsForce = new LinearLayout(this);
+		linearStart = new LinearLayout(this);
 
-		LinearLayout.LayoutParams liearParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+		
 		LinearLayout.LayoutParams buttonProperty = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		
-		linear.setOrientation(LinearLayout.VERTICAL);
-		linear.setLayoutParams(liearParams);
-		
-		
+		setPropertyOfLinearLayouts();
+
 		Log.i(TAG, "호스트 준비 모드 입장");
 		if(currentIntent == null)
 			Log.e(TAG, "현재 인텐트가 null 입니다.");
+		
+		
+		linear.addView(linearClients);
+		linear.addView(linearClientsForce);
+		linear.addView(linearDice);
+		linear.addView(linearDiceForce);
+		linear.addView(linearYuts);
+		linear.addView(linearYutsForce);
+		linear.addView(linearStart);
+		
 		
 		int minPlayers = (int) currentIntent.getExtras().get(MIN_PLAYERS);
 		int maxPlayers = (int) currentIntent.getExtras().get(MAX_PLAYERS);
@@ -281,7 +305,7 @@ public class AssistanceActivity extends Activity {
 		int exactYuts = (int) currentIntent.getExtras().get(EXACT_YUTS);
 		
 
-		
+		Log.i(TAG, "maxPlayers : " + maxPlayers);
 		for(int i = 0 ; i < maxPlayers ; i++){
 			Button button = new Button(this);
 			button.setLayoutParams(buttonProperty);
@@ -289,7 +313,7 @@ public class AssistanceActivity extends Activity {
 			button.setText(DEFAULT_PLAYER_NAME);
 			button.setBackgroundColor(Color.GRAY);
 			playerButtons.add(button);
-			linear.addView(button);
+			linearClients.addView(button);
 		}
 		
 		
@@ -298,10 +322,10 @@ public class AssistanceActivity extends Activity {
         forcePlayerButton.setText(DEFAULT_FORCE_PLAYERS_NAME);
         forcePlayerButton.setBackgroundColor(Color.BLUE);
         if(Mediator.getInstance().getMinPlayers() == 0 && Mediator.getInstance().getMaxPlayers() != 0){
-            forcePlayerButton.setVisibility(View.VISIBLE);
-        }else{
-            forcePlayerButton.setVisibility(View.INVISIBLE);
+            //forcePlayerButton.setVisibility(View.VISIBLE);
+            linearClientsForce.addView(forcePlayerButton);
         }
+        
         forcePlayerButton.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -315,9 +339,9 @@ public class AssistanceActivity extends Activity {
             }
         });
             
-        linear.addView(forcePlayerButton);
+        //linearClientsForce.addView(forcePlayerButton);
         
-
+        Log.i(TAG, "exactDicePluses : " + exactDicePluses);
 		for(int i = 0 ; i < exactDicePluses ; i++){
 			Button button = new Button(this);
 			button.setLayoutParams(buttonProperty);
@@ -325,7 +349,7 @@ public class AssistanceActivity extends Activity {
 			button.setText(DEFAULT_DICE_PLUS_NAME);
 			button.setBackgroundColor(Color.GRAY);
 			dicePlusButtons.add(button);
-			linear.addView(button);
+			linearDice.addView(button);
 		}
 		
 		if(exactDicePluses > 0){
@@ -350,12 +374,11 @@ public class AssistanceActivity extends Activity {
 				}
 			});
 			
-			linear.addView(forceDicePlusButton);
-			
-			
+			linearDiceForce.addView(forceDicePlusButton);
+
 		}
 
-			
+		Log.i(TAG, "exactYuts : " + exactYuts);
 		for(int i = 0 ; i < exactYuts ; i++){
 			Button button = new Button(this);
 			button.setLayoutParams(buttonProperty);
@@ -363,7 +386,7 @@ public class AssistanceActivity extends Activity {
 			button.setText(DEFAULT_ELECTRIC_YUT_NAME);
 			forceDicePlusButton.setBackgroundColor(Color.BLUE);
 			yutButtons.add(button);
-			linear.addView(button);
+			linearYuts.addView(button);
 		}
 		
 		if(exactYuts > 0){
@@ -387,27 +410,31 @@ public class AssistanceActivity extends Activity {
 				}
 			});
 			
-			linear.addView(forceElectricYutButton);
+			linearYutsForce.addView(forceElectricYutButton);
 		}
 		
 
 		startButton = new Button(this);
 		startButton.setLayoutParams(buttonProperty);
-		startButton.setText("Start");
-		startButton.setBackgroundColor(Color.YELLOW);
-		startButton.setVisibility(View.INVISIBLE);
+		startButton.setText(DEFAULT_START_BUTTON_NAME);
+		startButton.setTextColor(Color.WHITE);
+		startButton.setBackgroundColor(Color.BLACK);
+		//startButton.setVisibility(View.INVISIBLE);
 		startButton.setOnClickListener(new OnClickListener() {
 		
 			@Override
 			public void onClick(View button) {
 				Log.d(TAG, "온 클릭 게임시작");
 
-				if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE){
-					ElectricYutManager.getInstance().discardYuts();
-				}
-				//AssistanceActivity.this.finish();
+				Mediator.getInstance().completeMapping(SubjectDeviceMapper.getInstance().getPlayers(), 
+				        SubjectDeviceMapper.getInstance().getYutGameTools(), 
+				        SubjectDeviceMapper.getInstance().getDicePlusGameTools());
+				
 			}
 		});
+		
+		//linearStart.addView(startButton);
+		
 		
 		setContentView(linear);
 	}
@@ -478,10 +505,12 @@ public class AssistanceActivity extends Activity {
                     //가상으로 연결된 상태로 바꿈
                     for(int i = 0 ; i < playerButtons.size() ; i++){
                         if(commonButtonsMap.containsValue(playerButtons.get(i)) == false){//연결되지 않은 애들은 여기에없을꺼니까
-                            playerButtons.get(i).setVisibility(View.INVISIBLE);
+                            //playerButtons.get(i).setVisibility(View.INVISIBLE);
+                            linearClients.removeView(playerButtons.get(i));
                         }
                     }
-                    forcePlayerButton.setVisibility(View.INVISIBLE);
+                    //forcePlayerButton.setVisibility(View.INVISIBLE);
+                    linearClientsForce.removeView(forcePlayerButton);
                     
                     break;	
 					
@@ -512,7 +541,9 @@ public class AssistanceActivity extends Activity {
 					}
 					
 					if(Mediator.getInstance().getMinPlayers() <= currentConnectedPlayers && Mediator.getInstance().getMaxPlayers() != currentConnectedPlayers){
-					    forcePlayerButton.setVisibility(View.VISIBLE);
+					    //forcePlayerButton.setVisibility(View.VISIBLE);
+					    if(linearClientsForce.indexOfChild(forcePlayerButton) == -1)
+					        linearClientsForce.addView(forcePlayerButton);
 					}
 
 					break;
@@ -547,7 +578,8 @@ public class AssistanceActivity extends Activity {
                         yutButtons.get(i).setText(DEFAULT_VIRTUAL_YUT_NAME);
                         yutButtons.get(i).setBackgroundColor(Color.GREEN);
                     }
-                    forceElectricYutButton.setVisibility(View.INVISIBLE);
+                    //forceElectricYutButton.setVisibility(View.INVISIBLE);
+                    linearYuts.removeView(forceElectricYutButton);
                     
                     break;	
                     
@@ -559,7 +591,7 @@ public class AssistanceActivity extends Activity {
 					Toast.makeText(getApplicationContext(), ((BluetoothDevice)msg.obj).getAddress() + "is connected", Toast.LENGTH_SHORT).show();
 					yutButtons.get(lastYutActiveButtonIndex++).setBackgroundColor(Color.GREEN);
 					if(forceElectricYutButton != null)
-						forceElectricYutButton.setVisibility(View.INVISIBLE);
+    					linearYuts.removeView(forceElectricYutButton);
 					break;
 					
 					
@@ -589,7 +621,8 @@ public class AssistanceActivity extends Activity {
 						dicePlusButtons.get(i).setText(DEFAULT_VIRTUAL_DICE_NAME);
 						dicePlusButtons.get(i).setBackgroundColor(Color.GREEN);
 					}
-					forceDicePlusButton.setVisibility(View.INVISIBLE);
+					//forceDicePlusButton.setVisibility(View.INVISIBLE);
+					linearDiceForce.removeView(forceDicePlusButton);
 					break;
 					
 					
@@ -601,7 +634,7 @@ public class AssistanceActivity extends Activity {
 					dicePlusButtons.get(lastDicePlusActiveButtonIndex++).setBackgroundColor(Color.GREEN);
 					
 					if(forceDicePlusButton != null)
-						forceDicePlusButton.setVisibility(View.INVISIBLE);
+						linearDiceForce.removeView(forceDicePlusButton);
 					
 					break;
 					
@@ -686,6 +719,19 @@ public class AssistanceActivity extends Activity {
 					AssistanceActivity.this.finish();
 					
 					break;
+					
+				case GAME_IS_STARTABLE:
+				    Log.i(TAG, "시작해도 좋음");
+				    
+				    //startButton.setVisibility(View.VISIBLE);
+				    linearStart.addView(startButton);
+				    break;
+				    
+				case GAME_IS_NOT_STARTABLE:
+                    Log.i(TAG, "시작하면 안뎀");
+                    
+                    linearStart.removeView(startButton);
+                    break;    
 
 			}
 		}
@@ -713,18 +759,39 @@ public class AssistanceActivity extends Activity {
 		});
 		linear.addView(button);
 	}
-	
-	/*public void onStart(){
-		super.onStart();
-		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-		if(adapter.isEnabled() == false){
-			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			
-			startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-		}
-	}*/
-	
+
 	public Handler getHandler(){
 		return this.handler;
 	}
+
+	//helper
+	
+	private void setPropertyOfLinearLayouts(){
+	    LinearLayout.LayoutParams liearParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        
+        linear.setOrientation(LinearLayout.VERTICAL);
+        linear.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        
+        linearClients.setOrientation(LinearLayout.VERTICAL);
+        linearClients.setLayoutParams(liearParams);
+        
+        linearClientsForce.setOrientation(LinearLayout.VERTICAL);
+        linearClientsForce.setLayoutParams(liearParams);
+        
+        linearDice.setOrientation(LinearLayout.VERTICAL);
+        linearDice.setLayoutParams(liearParams);
+        
+        linearDiceForce.setOrientation(LinearLayout.VERTICAL);
+        linearDiceForce.setLayoutParams(liearParams);
+        
+        linearYuts.setOrientation(LinearLayout.VERTICAL);
+        linearYuts.setLayoutParams(liearParams);
+        
+        linearYutsForce.setOrientation(LinearLayout.VERTICAL);
+        linearYutsForce.setLayoutParams(liearParams);
+        
+        linearStart.setOrientation(LinearLayout.VERTICAL);
+        linearStart.setLayoutParams(liearParams);
+	}
+	
 }

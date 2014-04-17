@@ -175,29 +175,31 @@ public class SubjectDeviceMapper {
 
 	//등록될 때마다 모두 등록되엇는지 확인 후 완료 보고
 	private void checkIsAvaiableAndCommit(){
+	    Log.i(TAG, "checkIsAvaiableAndCommit() 진입");
 		if(isAvailable() == true){
+		    Log.i(TAG, "checkIsAvaiableAndCommit() : 시작가능함!");
 			Log.i(TAG, "맵퍼 결과 반영 - 최종 연결구성 완료");
 			Log.i(TAG, "총 클라이언트(호스트 수) :" + players.length);
 			Log.i(TAG, "총 윷 수 :" + yutGameTools.length);
 			Log.i(TAG, "총 주사위 수 :" + dicePlusGameTools.length);
-			Mediator.getInstance().completeMapping(players, yutGameTools, dicePlusGameTools);
+			
 			
 			//완료 보고 // 사실 중재자가 하는게 맞는거같에.. 나중에 바꾸자, 상태 매니저의 핸들러도..
-			//Message message = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.COMPLETE_ACTIVITY);
-			//message.sendToTarget();
+			Message message = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.GAME_IS_STARTABLE);
+			message.sendToTarget();
 		}
 	}
 	
 	//구성중에 맵퍼가 등록하지 못하도록
-	public void lostPlayer(){
+	public synchronized void lostPlayer(){
 	    clientDevices = null;
 	}
 	
-	public void lostDicePlus(){
+	public synchronized void lostDicePlus(){
 	    yutDevices = null;
 	}
 	
-	public void lostElectricYut(){
+	public synchronized void lostElectricYut(){
 	    dice = null;
 	}
 	

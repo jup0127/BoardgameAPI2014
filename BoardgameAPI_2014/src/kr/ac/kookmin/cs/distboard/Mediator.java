@@ -4,6 +4,8 @@ import kr.ac.kookmin.cs.distboard.activity.AssistanceActivity;
 import kr.ac.kookmin.cs.distboard.controller.ParticipantAdapter;
 import kr.ac.kookmin.cs.distboard.controller.ParticipantListener;
 import kr.ac.kookmin.cs.distboard.enumeration.Mode;
+import kr.ac.kookmin.cs.distboard.protocol.Request;
+import kr.ac.kookmin.cs.distboard.protocol.RequestReplyManager;
 import kr.ac.kookmin.cs.distboard.subobject.DicePlusGameTool;
 import kr.ac.kookmin.cs.distboard.subobject.YutGameTool;
 import kr.ac.kookmin.cs.distboard.system.ClientManager;
@@ -216,6 +218,10 @@ public class Mediator{
 		DistributedBoardgame.getInstance().setPlayers(players);
 		DistributedBoardgame.getInstance().setYutGameTools(yutGameTools);
 		DistributedBoardgame.getInstance().setDicePlusGameTools(dicePlusGameTools);
+		
+		Message message = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.COMPLETE_ACTIVITY);//액티비티 끄고
+        RequestReplyManager.getInstance().sendRequestToAllPlayer(Request.OK_TO_GO, null);//모든 애들에게 시작해도 좋다는 신호 전송
+        message.sendToTarget();
 		
 		DistributedBoardgame.getInstance().setState(DistributedBoardgame.MIDDLE_OF_GAME);
 			
