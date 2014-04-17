@@ -239,6 +239,7 @@ public class DistributedBoardgame {//singleton
 	 * 보드게임의 현재 상태를 리턴합니다.
 	 * 반환 값은 클래스변수 HOST_CLIENT_SELECT_MODE, HOST_PREPARE_MODE, CLIENT_JOIN_MODE, MIDDLE_OF_GAME를 참조하세요.
 	 * @return 보드게임의 현재 상태
+	 * 
 	 */
 	public int getState(){
 		return state;
