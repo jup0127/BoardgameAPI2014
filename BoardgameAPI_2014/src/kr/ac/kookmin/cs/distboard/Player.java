@@ -200,8 +200,9 @@ public class Player implements Serializable{
 	 * giveObject(...)메서드를 호출하기를 권장합니다.
 	 * @param obj 수여할 오브젝트
 	 */
-	public static void giveObjectToAllPlayer(Object obj){
-        RequestReplyManager.getInstance().sendRequestToAllPlayer(Request.GIVE_OBJECT, obj);
+	public static void giveObjectToAllPlayers(Object obj){
+	    Log.i(TAG, "GIVE OBJECT TO ALL PLAYERS");
+        RequestReplyManager.getInstance().sendRequestToAllPlayers(Request.GIVE_OBJECT, obj);
     }
     
 	/**
@@ -212,8 +213,8 @@ public class Player implements Serializable{
 	 * @param arg1 수여할 인자1
 	 * @param arg2 수여할 인자2
 	 */
-    public static void sendSituationToAllPlayer(Object obj, int arg1, int arg2){
-        RequestReplyManager.getInstance().sendRequestToAllPlayer(Request.GIVE_OBJECT, new ObjectArgument(obj, arg1, arg2)); 
+    public static void sendSituationToAllPlayers(Object obj, int arg1, int arg2){
+        RequestReplyManager.getInstance().sendRequestToAllPlayers(Request.GIVE_OBJECT, new ObjectArgument(obj, arg1, arg2)); 
     }
 	
     /**

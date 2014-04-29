@@ -17,6 +17,7 @@ import kr.ac.kookmin.cs.distboard.Mediator;
 import kr.ac.kookmin.cs.distboard.activity.AssistanceActivity;
 import kr.ac.kookmin.cs.distboard.enumeration.DeviceType;
 import kr.ac.kookmin.cs.distboard.enumeration.Mode;
+import kr.ac.kookmin.cs.distboard.subobject.YutGameTool;
 import kr.ac.kookmin.cs.distboard.util.ArrayListConverter;
 import kr.ac.kookmin.cs.distboard.util.ThreadTimer;
 import android.bluetooth.BluetoothAdapter;
@@ -370,6 +371,10 @@ public class ClientManager {// 싱글톤
 	// 접속
 	//무조껀 초기화(재합류 무시, 연결되었던 호스트 무시)
 	public void connect(BluetoothDevice device) {
+	    
+	    DicePlusManager.getInstance().establish(0, millisecTimeout);//강제 완성해서 노미네이트함, 클라이언트도 노미네이트 해야되니까
+	    ElectricYutManager.getInstance().establish(0, millisecTimeout);//강제 완성해서 노미네이트함, 클라이언트도 노미네이트 해야되니까
+	    
 		// 필요한것 초기화
 		for (int i = 0; i < maxClients; i++) {
 			instance.clientConnectSuccessList[i] = ConnectRemoteAndroidThread.CONNECT_NONE;// 초기값
@@ -426,10 +431,17 @@ public class ClientManager {// 싱글톤
 		Log.i(TAG, "블루투스 매니저 정리");
 		initialized = false;
 		
+		if(mConnectThreads != null){
+		    for(int i = 0 ; i < mConnectThreads.size() ; i++){
+		        mConnectThreads.get(i).cancel();
+            }
+		}
+		
 		// 종료할 때 해야하는일
-		if(mConnectedThreads != null)
-		for(int i = 0 ; i < mConnectedThreads.size() ; i++){
-			mConnectedThreads.get(i).cancel();
+		if(mConnectedThreads != null){
+		    for(int i = 0 ; i < mConnectedThreads.size() ; i++){
+			    mConnectedThreads.get(i).cancel();
+		    }
 		}
 		
 		// 리시버 등록해제등..

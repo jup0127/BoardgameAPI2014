@@ -1,6 +1,6 @@
 package kr.ac.kookmin.cs.distboard.system;
 
-import kr.ac.kookmin.cs.distboard.DistributedBoardgame;
+
 import kr.ac.kookmin.cs.distboard.Mediator;
 import kr.ac.kookmin.cs.distboard.enumeration.Mode;
 import us.dicepl.android.sdk.Die;

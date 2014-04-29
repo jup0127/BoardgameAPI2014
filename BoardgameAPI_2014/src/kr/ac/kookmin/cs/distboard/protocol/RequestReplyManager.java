@@ -143,7 +143,7 @@ public class RequestReplyManager{
 		
 	}
 	
-	public void sendRequestToAllPlayer(int requestType, Object obj){
+	public void sendRequestToAllPlayers(int requestType, Object obj){
 	    
 		Log.d(TAG, "모든 플레이어에게 객체 전송 진입");
 		Player[] currentPlayers = DistributedBoardgame.getInstance().getPlayers();

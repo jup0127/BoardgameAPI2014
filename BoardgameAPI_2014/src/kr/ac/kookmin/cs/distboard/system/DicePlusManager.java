@@ -136,16 +136,22 @@ public class DicePlusManager {
 			Log.d(TAG, "Connection Lost");
 			
 			//끊김보고
-			CommunicationStateManager.getInstance().onDicePlusLost(die);
 
 			if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE && initialized == true){//연결 구성 중일때, 또는 초기화되었을때, 초기화는 clear시에 연결 종료로 다시 불려지지 않게하기 위함.
 				//해당 주사위를 삭제 - 어차피 구성 엔트리이어서는 안되기 때문
 				hasPerfectlyNominated = false;
-				dice.remove(die);
-				scaned.remove(die);
-				BluetoothManipulator.startScan();
+				if(dice.indexOf(die) != -1){
+				    Log.i(TAG, "연결 끊어짐 : 연결되었던 놈이 끊어짐");
+				    dice.remove(die);
+				    scaned.remove(die);
+				    BluetoothManipulator.startScan();
+				    CommunicationStateManager.getInstance().onDicePlusLost(die);
+				}else{
+				    Log.w(TAG, "연결 끊어짐 : 연결 되지 않았던 놈이 끊어짐");
+				}
 			}else if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME && initialized == true){//게임중에 끊겼다면
 			    Log.e(TAG, "게임중일때 DICE+ 접속 끊김.");
+			    CommunicationStateManager.getInstance().onDicePlusLost(die);
 			}
 			//BluetoothManipulator.startScan();
 		}
@@ -206,10 +212,11 @@ public class DicePlusManager {
 			}
 			
 			
-
+			
 			// 연결할 Dice+ 개수가 0개이면
 			if (exactElectricGameToolDicePlus == 0 || Mediator.getInstance().getMode() == Mode.CLIENT) {
 				// 보고 후 바로 리턴
+			    Log.i(TAG, "클라이언트이거나 주사위 개수가 0 -> 바로 노미네이트");
 				hasPerfectlyNominated = true;
 				CandidateManager.getInstance().nominateDice(new Die[0]);
 				// CommunicationStateManager.getInstance().onDicePlusEstablishComplete(new

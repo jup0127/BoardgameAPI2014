@@ -185,8 +185,11 @@ public class SubjectDeviceMapper {
 			
 			
 			//완료 보고 // 사실 중재자가 하는게 맞는거같에.. 나중에 바꾸자, 상태 매니저의 핸들러도..
-			Message message = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.GAME_IS_STARTABLE);
-			message.sendToTarget();
+			if(Mediator.getInstance().getMode() == Mode.HOST){
+			    Log.i(TAG, "GAME_IS_STARTABLE 핸들러 메시지 전송 직전 모드는 : " + Mediator.getInstance().getMode());
+			    Message message = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.GAME_IS_STARTABLE);
+			    message.sendToTarget();
+			}
 		}
 	}
 	

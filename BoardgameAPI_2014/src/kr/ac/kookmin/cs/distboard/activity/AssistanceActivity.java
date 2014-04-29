@@ -681,6 +681,11 @@ public class AssistanceActivity extends Activity {
 				    
 				    Log.i(TAG, "OK TO GO 출력!!");
 					handler = null;
+					
+					Mediator.getInstance().completeMapping(SubjectDeviceMapper.getInstance().getPlayers(), 
+	                        SubjectDeviceMapper.getInstance().getYutGameTools(), 
+	                        SubjectDeviceMapper.getInstance().getDicePlusGameTools());
+					
 					DistributedBoardgame.getInstance().getDistributedBoardgameListener().onGameStartable(Mode.CLIENT);//////////!!!코드바꿈
 					//Toast.makeText(getApplicationContext(), "OK TO GO", Toast.LENGTH_SHORT).show();
 					AssistanceActivity.this.finish();
@@ -693,6 +698,11 @@ public class AssistanceActivity extends Activity {
 				    
 					Log.i(TAG, "OK TO RESUME 출력!!");
 					handler = null;
+					
+					Mediator.getInstance().completeMapping(SubjectDeviceMapper.getInstance().getPlayers(), 
+	                        SubjectDeviceMapper.getInstance().getYutGameTools(), 
+	                        SubjectDeviceMapper.getInstance().getDicePlusGameTools());
+					
 					DistributedBoardgame.getInstance().getDistributedBoardgameListener().onGameResumable();//////////!!!코드바꿈
 					AssistanceActivity.this.finish();
 					

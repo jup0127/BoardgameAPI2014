@@ -113,6 +113,7 @@ public class ElectricYutManager {
 
 			// 연결할 Dice+ 개수가 0개이면
 			if (exactElectricGameToolYut == 0 || Mediator.getInstance().getMode() == Mode.CLIENT) {
+			    Log.i(TAG, "클라이언트이거나 윷개수가 0 -> 바로 노미네이트");
 				// 보고 후 바로 리턴
 				hasPerfectlyNominated = true;
 				CandidateManager.getInstance().nominateYutDevices(new BluetoothDevice[0]);
