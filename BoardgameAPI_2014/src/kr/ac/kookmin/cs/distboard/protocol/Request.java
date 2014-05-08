@@ -22,7 +22,10 @@ public class Request implements Serializable{
 	public static final int APPEAR_DICE_EMULATOR = 5;
 	public static final int APPEAR_YUT_EMULATOR = 6;
 	
-	public static final int DISSAPEAR_DICE_EMULATOR = 7;
+	
+	public static final int DISAPPEAR_EMULATOR = 7;
+	
+	@Deprecated
 	public static final int DISSAPEAR_YUT_EMULATOR = 8;
 	
 	@Deprecated

@@ -77,9 +77,13 @@ public class RequestReplyManager{
                     break;
 				case Request.APPEAR_DICE_EMULATOR:
 					Log.d(TAG, "APPEAR_DICE_EMULATOR로 판명");
-					EmulatorReceiver.getInstance().appear();
+					EmulatorReceiver.getInstance().appear(0);
 					break;
-				case Request.DISSAPEAR_DICE_EMULATOR:
+				case Request.APPEAR_YUT_EMULATOR:
+                    Log.d(TAG, "APPEAR_YUT_EMULATOR로 판명");
+                    EmulatorReceiver.getInstance().appear(1);
+                    break;
+				case Request.DISAPPEAR_EMULATOR:
 					Log.d(TAG, "DISSAPPEAR_DICE_EMULATOR로 판명");
 					EmulatorReceiver.getInstance().disappear();
 					break;

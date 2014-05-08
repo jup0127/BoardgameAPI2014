@@ -149,26 +149,40 @@ public class Player implements Serializable{
 	    Log.i(TAG, "가상 게임도구 주사위 열기 메서드 진입");
 		if(this.isThisPlayer() == true){
 		    Log.i(TAG, "이 플레이어의 경우");
-		    EmulatorReceiver.getInstance().appear();
+		    EmulatorReceiver.getInstance().appear(0);
 		}else{
 		    Log.i(TAG, "이 플레이어가 아님");
 		    RequestReplyManager.getInstance().sendRequest(this, Request.APPEAR_DICE_EMULATOR, null);
 		}
 	}
 	
+	/**
+     * 플레이어의 가상게임도구-윷을 사용가능한 상태로 만듭니다.
+     */
+    public void openVirtualGameToolYut(){
+        Log.i(TAG, "가상 게임도구 주사위 열기 메서드 진입");
+        if(this.isThisPlayer() == true){
+            Log.i(TAG, "이 플레이어의 경우");
+            EmulatorReceiver.getInstance().appear(1);
+        }else{
+            Log.i(TAG, "이 플레이어가 아님");
+            RequestReplyManager.getInstance().sendRequest(this, Request.APPEAR_YUT_EMULATOR, null);
+        }
+    }
+	
 	//called by host
 	
 	/**
-	 * 플레이어의 가상게임도구-주사위를 사용 불가능 상태로 만듭니다.
+	 * 플레이어의 가상게임도구를 사용 불가능 상태로 만듭니다.
 	 */
-	public void closeVirtualGameToolDice(){
+	public void closeVirtualGameTool(){
 		//this play 처리 나중에 추가
 	    if(this.isThisPlayer() == true){
             Log.i(TAG, "이 플레이어의 경우");
             EmulatorReceiver.getInstance().disappear();
 	    }else{
 	        Log.i(TAG, "이 플레이어가 아님");
-	        RequestReplyManager.getInstance().sendRequest(this, Request.DISSAPEAR_DICE_EMULATOR, null);
+	        RequestReplyManager.getInstance().sendRequest(this, Request.DISAPPEAR_EMULATOR, null);
 	    }
 	}
 	
