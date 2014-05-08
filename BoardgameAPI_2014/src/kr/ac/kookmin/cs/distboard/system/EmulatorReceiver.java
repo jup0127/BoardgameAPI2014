@@ -52,10 +52,10 @@ public class EmulatorReceiver extends BroadcastReceiver {
         Log.d(TAG, "초기화 컨텍스트" + context.toString());
         ableButton = "0";
         diceNumber = "";
-        setDiceNumber = "";
-        setYutNumber = "";
+        setDiceNumber = "2";
+        setYutNumber = "3";
         activityName = "";
-        setBackYutNumber = "";
+        setBackYutNumber = "1";
         itemType = "";
         filter = new IntentFilter("android.intent.action.SUPER");
         inputActivityName = "";
