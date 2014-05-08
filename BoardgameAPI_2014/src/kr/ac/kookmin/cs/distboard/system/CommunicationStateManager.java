@@ -8,6 +8,7 @@ import kr.ac.kookmin.cs.distboard.enumeration.Mode;
 import kr.ac.kookmin.cs.distboard.protocol.Reply;
 import kr.ac.kookmin.cs.distboard.protocol.Request;
 import kr.ac.kookmin.cs.distboard.protocol.RequestReplyManager;
+import kr.ac.kookmin.cs.distboard.subobject.YutGameTool;
 import us.dicepl.android.sdk.Die;
 import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
@@ -255,7 +256,7 @@ public class CommunicationStateManager {
 	}
 	
 	public synchronized void onBytesDelivered(BluetoothDevice device, byte[] bytes){
-		RequestReplyManager.getInstance().handleMessage((Player)SubjectDeviceMapper.getInstance().map(device), bytes);
+		RequestReplyManager.getInstance().handleMessage((YutGameTool)SubjectDeviceMapper.getInstance().map(device), bytes);
 	}
 	
 	

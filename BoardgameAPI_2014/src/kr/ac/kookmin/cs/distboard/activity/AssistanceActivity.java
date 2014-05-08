@@ -384,7 +384,7 @@ public class AssistanceActivity extends Activity {
 			button.setLayoutParams(buttonProperty);
 			
 			button.setText(DEFAULT_ELECTRIC_YUT_NAME);
-			forceDicePlusButton.setBackgroundColor(Color.BLUE);
+			button.setBackgroundColor(Color.GRAY);
 			yutButtons.add(button);
 			linearYuts.addView(button);
 		}
@@ -579,7 +579,7 @@ public class AssistanceActivity extends Activity {
                         yutButtons.get(i).setBackgroundColor(Color.GREEN);
                     }
                     //forceElectricYutButton.setVisibility(View.INVISIBLE);
-                    linearYuts.removeView(forceElectricYutButton);
+                    linearYutsForce.removeView(forceElectricYutButton);
                     
                     break;	
                     
@@ -591,7 +591,7 @@ public class AssistanceActivity extends Activity {
 					Toast.makeText(getApplicationContext(), ((BluetoothDevice)msg.obj).getAddress() + "is connected", Toast.LENGTH_SHORT).show();
 					yutButtons.get(lastYutActiveButtonIndex++).setBackgroundColor(Color.GREEN);
 					if(forceElectricYutButton != null)
-    					linearYuts.removeView(forceElectricYutButton);
+					    linearYutsForce.removeView(forceElectricYutButton);
 					break;
 					
 					

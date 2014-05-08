@@ -71,18 +71,38 @@ public class GameToolSystemManager {
 			/**
 			 * 중복검사 필요(한 주사위 두번던지기 방지)
 			 */
+		    
 			tempDiceGameToolDatas.add(new GameToolData(rollData.face, null));
 			
 			//모든 주사위가 굴려졌다면
 			if(tempDiceGameToolDatas.size() == DistributedBoardgame.getInstance().getNumOfDiceIntention()){
 				GameTool.getGameToolListener().onDiceRolls(null, ArrayListConverter.gameToolDataArrayListToArray(tempDiceGameToolDatas));
-				tempDiceGameToolDatas.clear();
+				//tempDiceGameToolDatas.clear();
+				tempDiceGameToolDatas.clear();//이것때문에 오류가 발생할 수도 있어
 			}
 		}
 	}
 	
 	public void onElectricYutRoll(BluetoothDevice yutDevice, int face){//rollData의 안에 많은 데이터가 잇는것을 감안해 많은 데이터가 인자로 올 예정
-		
+	    
+	    Log.i(TAG, "onElectricYutRoll FACE : " + face);
+	    
+	    if(DistributedBoardgame.getInstance().isGetYutValuesAtOnce() == false){//한번에 처리해야되는 상황이 아니면
+            //바로 보고
+            GameTool.getGameToolListener().onYutRoll(null, new GameToolData(face, null));
+        }else{//한번에 처리해야되는 상황이면
+            
+            /**
+             * 중복검사 필요(한 주사위 두번던지기 방지)
+             */
+            tempYutGameToolDatas.add(new GameToolData(face, null));
+            
+            //모든 주사위가 굴려졌다면
+            if(tempYutGameToolDatas.size() == DistributedBoardgame.getInstance().getNumOfYutsIntentin()){
+                GameTool.getGameToolListener().onYutRolls(null, ArrayListConverter.gameToolDataArrayListToArray(tempYutGameToolDatas));
+                tempYutGameToolDatas.clear();
+            }
+        }
 	}
 	
 	public void onLocalVirtualDiceRoll(int[] face){//rollData의 안에 많은 데이터가 잇는것을 감안해 많은 데이터가 인자로 올 예정

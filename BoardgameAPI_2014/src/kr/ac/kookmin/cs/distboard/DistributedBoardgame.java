@@ -66,7 +66,7 @@ public class DistributedBoardgame {//singleton
 	private int state = NONE;//현재의 상태
 	
 	private int numOfDiceIntention = 0;//의도한 주사위 개수
-	private int numOfYutIntentin = 0;//의도한 윷 개수
+	private int numOfYutsIntentin = 0;//의도한 윷 개수
 	private boolean diceAtOnce = false;
 	private boolean yutsAtOnce = false;
 	
@@ -146,7 +146,7 @@ public class DistributedBoardgame {//singleton
 	    }
 	    
 		numOfDiceIntention = exactDice;
-		numOfYutIntentin = exactYuts;
+		numOfYutsIntentin = exactYuts;
 		
 		diceAtOnce = false;
 		yutsAtOnce = false;
@@ -265,8 +265,8 @@ public class DistributedBoardgame {//singleton
 	/**
      * 아직 지원하지 않는 메소드
      */
-	public int getNumOfYutIntentin() {
-		return numOfYutIntentin;
+	public int getNumOfYutsIntentin() {
+		return numOfYutsIntentin;
 	}
 
 	public Context getContext(){

@@ -21,32 +21,32 @@ import kr.ac.kookmin.cs.distboard.DistributedBoardgame;
 import kr.ac.kookmin.cs.distboard.Mediator;
 import kr.ac.kookmin.cs.distboard.enumeration.DeviceType;
 import kr.ac.kookmin.cs.distboard.enumeration.Mode;
-import kr.ac.kookmin.cs.distboard.system.ClientManager.ConnectThread;
-import kr.ac.kookmin.cs.distboard.system.ClientManager.ConnectedThread;
+
 import kr.ac.kookmin.cs.distboard.util.ArrayListConverter;
 import kr.ac.kookmin.cs.distboard.util.ThreadTimer;
 
 
 public class ElectricYutManager {
 	
-	
 	private static final String TAG = "20083271:ElectricYutManager";
 	
+	//dummy bytes
 	
+	public static final byte DUMMY = 0x00;
 	
 	//for host
 	
 	public static final byte REQUEST_SUBSCRIBE_HEADER = 0x00;//body is null
-	
-	public static final byte REQUEST_RELEASE_HEADER = 0x01;//body is null
-	
+
 	
 	//for electric yut
 	
 	
-	public static final byte RESPONSE_SUBSCRIBE_HEADER = 0x02;//body is 0x00 or 0x01
+	public static final byte RESPONSE_SUBSCRIBE_HEADER = 0x01;//body is 0x00 or 0x01
 	
+	public static final byte REQUEST_UNSUBSCRIBE_HEADER = 0x02;//body is null
 	
+	public static final byte REQUEST_RELEASE_HEADER = 0x03;//body is null
 	
 	
 	
@@ -219,8 +219,11 @@ public class ElectricYutManager {
 		return null;
 	}
 	
-	public void write(BluetoothDevice device){
-		
+	public synchronized void write(BluetoothDevice device, byte[] bytes){
+	    if(getConnectedElectricYutThreadOf(device) instanceof ConnectedElectricYutThread)
+            ((ConnectedElectricYutThread)getConnectedElectricYutThreadOf(device)).write(bytes);
+        else
+            Log.e(TAG, "해당 장치에 Object를 기록할 수 없습니다.");
 	}
 	
 	public synchronized void clear(){
@@ -234,6 +237,10 @@ public class ElectricYutManager {
 			DistributedBoardgame.getInstance().getContext().unregisterReceiver(mReceiver);
 		}
 		for(int i = 0 ; i < connectedThreads.size() ; i++){
+		    Log.i(TAG, "구독 해제중");
+		    connectedThreads.get(i).write(new byte[]{ElectricYutManager.REQUEST_UNSUBSCRIBE_HEADER, ElectricYutManager.DUMMY});//
+		    
+		    Log.i(TAG, "열결된 스레드 취소중");
 		    connectedThreads.get(i).cancel();
 		}
 	}
@@ -259,7 +266,9 @@ public class ElectricYutManager {
 	
 	private void onDiscoverFinished(){
 		if(isTimeOuted == false && hasPerfectlyNominated == false){
-			bluetoothAdapter.cancelDiscovery();
+		    if(bluetoothAdapter.isDiscovering())
+		        bluetoothAdapter.cancelDiscovery();
+		    
 			bluetoothAdapter.startDiscovery();
 		}
 	}
@@ -293,9 +302,14 @@ public class ElectricYutManager {
 				
 				for(int i = 0; i < yuts.size() ; i++){
 					//구독등록!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				    byte[] bytes = new byte[2];
+				    bytes[0] = REQUEST_SUBSCRIBE_HEADER;
+				    bytes[1] = DUMMY;
+				    Log.i(TAG, "윷 구독 등록중 : " + yuts.get(i).getAddress() + " " + bytes);
+				    ElectricYutManager.getInstance().write(device, bytes);
 				}
 				
-				Log.w(TAG ,"모든 전자 윷 구독 등록 완료 : 아직 미완성");
+				Log.i(TAG ,"모든 전자 윷 구독 등록 완료");
 				
 			}
 		}else{
@@ -335,8 +349,7 @@ public class ElectricYutManager {
 		}else{
 			Log.e(TAG, "인자 connectThread가 null");
 		}
-		
-		
+
 	}
 	
   	private class ConnectElectricYutThread extends Thread{
@@ -421,13 +434,15 @@ public class ElectricYutManager {
 
  	private class ConnectedElectricYutThread extends Thread{
 
-		private static final String TAG = "20083271:ConnectedRemoteAndroidThread";
+		private static final String TAG = "20083271:ConnectedElectricYutThread";
 
 		//private int connectIndex = -1;
 		// private BluetoothDevice mmDevice;
 		private BluetoothSocket mmSocket;
 
 		private byte[] mmTempBuffer;
+		private byte[] mmTempBuffers;
+		int mmLength = 0;//실제읽은 바이트 수
 		private InputStream mmInStream;
 		private OutputStream mmOutStream;
 
@@ -436,7 +451,9 @@ public class ElectricYutManager {
 			Log.d(TAG, "원격 안드로이드 연결된 스레드 생성자");
 			
 			mmSocket = socket;
-			mmTempBuffer = new byte[1024];
+			mmTempBuffer = new byte[1];
+			mmTempBuffers = new byte[2];
+			mmLength = 0;//실제읽은 바이트 수
 			InputStream tmpIn = null;
 			OutputStream tmpOut = null;
 
@@ -461,8 +478,29 @@ public class ElectricYutManager {
 			while (true) {
 				try {
 					// Read from the InputStream
-					mmInStream.read(mmTempBuffer);
-					CommunicationStateManager.getInstance().onBytesDelivered(mmSocket.getRemoteDevice(), mmTempBuffer);
+				    Log.i(TAG, "전자윷으로부터 메시지 읽기전");
+				    
+				    mmLength += mmInStream.read(mmTempBuffer);
+				    
+				    if(mmLength % 2 == 1){//첫 번째꺼
+				        mmTempBuffers[0] = mmTempBuffer[0];
+				    }else if(mmLength % 2 == 0){
+				        mmTempBuffers[1] = mmTempBuffer[0];
+				        
+				        for(int i = 0 ; i < mmTempBuffers.length ; i++){
+	                        Log.i(TAG, "전자윷으로부터의 데이터[" + i + "] : " + mmTempBuffers[i]);
+	                    }
+				        
+				        CommunicationStateManager.getInstance().onBytesDelivered(mmSocket.getRemoteDevice(), mmTempBuffers);
+				        
+				        mmLength = 0;
+				    }else{
+				        Log.w(TAG, "아무것도 아닌 상황");
+				    }
+					
+					Log.i(TAG, "전자윷으로부터 메시지 읽은 후");
+					
+					
 
 				} catch (IOException e) {
 					Log.e(TAG, "연결 끊어짐", e);
@@ -475,7 +513,10 @@ public class ElectricYutManager {
 		}
 
 		public void write(byte[] buffer) {
-			Log.i(TAG, "객체 쓰기 : " + buffer);
+			Log.i(TAG, "바이트 쓰기 : ");
+			for(int i = 0 ; i < buffer.length ; i++){
+			    Log.i(TAG, "바이트[" + i + "] : " + buffer[i]);
+			}
 			try {
 				mmOutStream.write(buffer);
 				mmOutStream.flush();

@@ -51,17 +51,18 @@ public class EmulatorReceiver extends BroadcastReceiver {
         context = DistributedBoardgame.getInstance().getContext();
         Log.d(TAG, "초기화 컨텍스트" + context.toString());
         ableButton = "0";
-        diceNumber = "";
+        diceNumber = "2";
         setDiceNumber = "2";
         setYutNumber = "3";
         activityName = "";
         setBackYutNumber = "1";
-        itemType = "";
+        itemType = "0";
         filter = new IntentFilter("android.intent.action.SUPER");
         inputActivityName = "";
         packageName=context.getPackageName();
         
         setNumberOfDice(DistributedBoardgame.getInstance().getNumOfDiceIntention());
+        setNumberOfYuts(DistributedBoardgame.getInstance().getNumOfYutsIntentin());
         //윷추가할것
         
         setReceiver();
@@ -166,8 +167,8 @@ public class EmulatorReceiver extends BroadcastReceiver {
         setDiceNumber = "" + numOfDice;
     }
     //set yut number
-    public void setNumberOfYut(int numOfYut) {
-        setYutNumber = "" + numOfYut;
+    public void setNumberOfYuts(int numOfYuts) {
+        setYutNumber = "" + numOfYuts;
     }
     //set backYut number
     public void setNumberOfBackYut(int numOfBackYut) {

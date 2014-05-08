@@ -5,19 +5,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import bli.m;
-
-import us.dicepl.android.sdk.Die;
 import kr.ac.kookmin.cs.distboard.DistributedBoardgame;
-import kr.ac.kookmin.cs.distboard.Mediator;
-import kr.ac.kookmin.cs.distboard.activity.AssistanceActivity;
 import kr.ac.kookmin.cs.distboard.enumeration.DeviceType;
 import kr.ac.kookmin.cs.distboard.enumeration.Mode;
-import kr.ac.kookmin.cs.distboard.subobject.YutGameTool;
 import kr.ac.kookmin.cs.distboard.util.ArrayListConverter;
 import kr.ac.kookmin.cs.distboard.util.ThreadTimer;
 import android.bluetooth.BluetoothAdapter;
@@ -433,7 +425,8 @@ public class ClientManager {// 싱글톤
 		
 		if(mConnectThreads != null){
 		    for(int i = 0 ; i < mConnectThreads.size() ; i++){
-		        mConnectThreads.get(i).cancel();
+		        if(mConnectThreads.get(i) != null)
+		            mConnectThreads.get(i).cancel();
             }
 		}
 		
@@ -883,7 +876,7 @@ public class ClientManager {// 싱글톤
 		}
 		
 		public void run() {
-
+		    
 			//currentAcceptIndex = -1;//-1이 아닌경우 해당 차례에 해당 인덱스로 계산할 것
 			
 			// Create a new listening server socket
@@ -895,9 +888,9 @@ public class ClientManager {// 싱글톤
 							this.cancel();
 							return;//스레드가 리턴할까?
 						}
-					
+						
 						//mConnectedThreads의 크기는 구성중에 절대 줄어들지 않는다.
-					
+						
 						accept(i);
 					
 					}
@@ -921,8 +914,9 @@ public class ClientManager {// 싱글톤
 			}
 		}
 		
-		public void accept(int currentIndex) throws IOException{
-			synchronized (ClientManager.this) {	//결국 메서드에 sync 하는것도 똑같을듯.
+		public synchronized void accept(int currentIndex) throws IOException{
+		    
+			//synchronized (AcceptThread.this) {	//결국 메서드에 sync 하는것도 똑같을듯.
 				Log.i(TAG, "현재의 수락중 인덱스 : " + currentIndex);
 				mmServerSocket = mAdapter.listenUsingRfcommWithServiceRecord("BluetoothManagerIn?secure", uuids.get(currentIndex));
 				BluetoothSocket socket = null;
@@ -947,16 +941,17 @@ public class ClientManager {// 싱글톤
 				mmServerSocket.close();
 				mmServerSocket = null;
 				socket = null;
-			}
+			//}
 
 		}
 		
 		public void cancel() {
 			Log.i(TAG, "수락 스레드가 취소되었습니다.");
 			try {
+			    terminated = true;
 				if(mmServerSocket != null)
 					mmServerSocket.close();
-				terminated = true;
+				
 			} catch (IOException e) {
 				Log.e(TAG, "서버의 close() 실패", e);
 			}
@@ -985,20 +980,20 @@ public class ClientManager {// 싱글톤
 		
 		public ConnectRemoteAndroidThread(BluetoothDevice device, int connectIndex) {
 			Log.d(TAG, "새로운 연결 스레드, 인덱스: " + connectIndex);
-
+			
 			this.connectIndex = connectIndex;
 			mmDevice = device;
-
+			
 			try {
-
+			    
 				mmSocket = device.createRfcommSocketToServiceRecord(uuids.get(connectIndex));
-
+				
 				if (mmSocket != null) {
 					Log.i(TAG, "소켓 생성됨.");
 				} else {
 					Log.e(TAG, "소켓 생성되지 않음");
 				}
-
+				
 			} catch (IOException e) {
 				Log.e(TAG, "create() failed", e);
 			}

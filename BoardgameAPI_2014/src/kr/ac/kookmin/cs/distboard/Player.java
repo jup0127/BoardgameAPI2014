@@ -160,7 +160,7 @@ public class Player implements Serializable{
      * 플레이어의 가상게임도구-윷을 사용가능한 상태로 만듭니다.
      */
     public void openVirtualGameToolYut(){
-        Log.i(TAG, "가상 게임도구 주사위 열기 메서드 진입");
+        Log.i(TAG, "가상 게임도구 윷 열기 메서드 진입");
         if(this.isThisPlayer() == true){
             Log.i(TAG, "이 플레이어의 경우");
             EmulatorReceiver.getInstance().appear(1);
@@ -203,7 +203,11 @@ public class Player implements Serializable{
 	 * @param numOfYuts
 	 */
 	public void setNumOfYuts(int numOfYuts){
-	    
+	    if(this.isThisPlayer()){
+            EmulatorReceiver.getInstance().setNumberOfYuts(numOfYuts);
+        }else{
+            RequestReplyManager.getInstance().sendRequest(this, Request.SET_NUM_OF_YUT, numOfYuts);
+        }
 	}
 	
 	//static method

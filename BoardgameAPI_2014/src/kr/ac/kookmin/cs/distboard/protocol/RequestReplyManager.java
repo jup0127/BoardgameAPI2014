@@ -93,7 +93,7 @@ public class RequestReplyManager{
                     break;
 				case Request.SET_NUM_OF_YUT:
                     Log.d(TAG, "SET_NUM_OF_YUT로 판명");
-                    EmulatorReceiver.getInstance().setNumberOfYut((Integer)currentRequest.content);
+                    EmulatorReceiver.getInstance().setNumberOfYuts((Integer)currentRequest.content);
                     break;
 			}
 
@@ -109,8 +109,28 @@ public class RequestReplyManager{
 		}
 	}
 	
-	public void handleMessage(Player player, byte[] bytesMessage){
-		
+	public void handleMessage(YutGameTool yut, byte[] bytesMessage){
+	    
+	    Log.i(TAG, "바이트 메시지 수신 : " + bytesMessage);
+	    
+	    if(bytesMessage[0] == ElectricYutManager.RESPONSE_SUBSCRIBE_HEADER){
+	        
+	        Log.i(TAG, "윷 굴려진 판명");
+	        if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME){
+	            
+                Log.d(TAG, "Roll: " + bytesMessage[1]);
+                yut.setFace(bytesMessage[1]);//다이스 플러스 게임툴의 정보도 갱신하고
+                
+                GameToolSystemManager.getInstance().onElectricYutRoll(SubjectDeviceMapper.getInstance().map(yut), bytesMessage[1]);//따로 시스템적 보고도 한다
+           
+	        }else{
+                
+                Log.w(TAG, "게임중이 아닐때 굴려진 윷");
+            }
+	        
+	    }else{
+	        Log.w(TAG, "지원하지 않는 헤더 : " + bytesMessage[0]);
+	    }
 	}
 	
 	public void sendRequest(Player player, int requestType, Object obj){
