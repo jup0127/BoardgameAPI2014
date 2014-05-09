@@ -27,10 +27,10 @@ public class EmulatorReceiver extends BroadcastReceiver {
     
     private Context context = null;
     private String ableButton = "0";
-    private String diceNumber = "";
+    private String diceNumber = "2";
     private String setDiceNumber = "";
-    private String setYutNumber = "";
-    private String setBackYutNumber = "";
+    private String setYutNumber = "3";
+    private String setBackYutNumber = "1";
     private String itemType = "";
     private String activityName = "";
     private static IntentFilter filter = null;
@@ -56,13 +56,12 @@ public class EmulatorReceiver extends BroadcastReceiver {
         setYutNumber = "3";
         activityName = "";
         setBackYutNumber = "1";
-        itemType = "0";
+        itemType = "";
         filter = new IntentFilter("android.intent.action.SUPER");
         inputActivityName = "";
         packageName=context.getPackageName();
         
         setNumberOfDice(DistributedBoardgame.getInstance().getNumOfDiceIntention());
-        setNumberOfYuts(DistributedBoardgame.getInstance().getNumOfYutsIntentin());
         //윷추가할것
         
         setReceiver();
@@ -167,8 +166,9 @@ public class EmulatorReceiver extends BroadcastReceiver {
         setDiceNumber = "" + numOfDice;
     }
     //set yut number
-    public void setNumberOfYuts(int numOfYuts) {
-        setYutNumber = "" + numOfYuts;
+    public void setNumberOfYut(int numOfYut) {
+        numOfYut = numOfYut - Integer.parseInt(setBackYutNumber);
+        setYutNumber = "" + numOfYut;
     }
     //set backYut number
     public void setNumberOfBackYut(int numOfBackYut) {
