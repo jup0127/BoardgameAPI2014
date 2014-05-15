@@ -221,9 +221,9 @@ public class EmulatorReceiver extends BroadcastReceiver {
         for (int i = 0; i < rollValues.length(); i++){
             if(itemType.equals("1")){ // yut
                 if(Integer.parseInt(Character.toString(rollValues.charAt(i)))!=6)
-                    saveRollValues[i]=1;
-                else
                     saveRollValues[i]=0;
+                else
+                    saveRollValues[i]=1;
             }
             else // dice
                 saveRollValues[i] = Integer.parseInt(Character.toString(rollValues.charAt(i)));
