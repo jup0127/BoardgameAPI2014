@@ -66,9 +66,10 @@ public class DistributedBoardgame {//singleton
 	private int state = NONE;//현재의 상태
 	
 	private int numOfDiceIntention = 0;//의도한 주사위 개수
-	private int numOfYutsIntentin = 0;//의도한 윷 개수
+	private int numOfYutsIntention = 0;//의도한 윷 개수
 	private boolean diceAtOnce = false;
 	private boolean yutsAtOnce = false;
+	private boolean majorityRule = false;
 	
 	private Mediator mediator = null;//singleton
 	private DicePlusGameTool[] dicePlusGameTools = null;
@@ -98,6 +99,13 @@ public class DistributedBoardgame {//singleton
 		instance.state = DistributedBoardgame.NONE;
 		instance.mode = Mode.NONE;//싱글톤 조심용
 		instance.context = context;
+		
+		instance.numOfDiceIntention = 0;//의도한 주사위 개수
+		instance.numOfYutsIntention = 0;//의도한 윷 개수
+	    instance.diceAtOnce = false;
+	    instance.yutsAtOnce = false;
+	    instance.majorityRule = false;
+		
 		instance.mediator = null;//싱글톤 조심용
 		instance.dicePlusGameTools = null;//싱글톤 조심용
 		instance.yutGameTools = null;//싱글톤 조심용
@@ -146,7 +154,7 @@ public class DistributedBoardgame {//singleton
 	    }
 	    
 		numOfDiceIntention = exactDice;
-		numOfYutsIntentin = exactYuts;
+		numOfYutsIntention = exactYuts;
 		
 		diceAtOnce = false;
 		yutsAtOnce = false;
@@ -261,13 +269,21 @@ public class DistributedBoardgame {//singleton
 	public int getNumOfDiceIntention() {
 		return numOfDiceIntention;
 	}
+	
+	public void setNumOfDiceIntention(int numOfDiceIntention){
+	    this.numOfDiceIntention = numOfDiceIntention;
+	}
 
 	/**
      * 아직 지원하지 않는 메소드
      */
-	public int getNumOfYutsIntentin() {
-		return numOfYutsIntentin;
+	public int getNumOfYutsIntention() {
+		return numOfYutsIntention;
 	}
+	
+	public void setNumOfYutsIntention(int numOfYutsIntention){
+        this.numOfYutsIntention = numOfYutsIntention;
+    }
 
 	public Context getContext(){
 		return context;
@@ -311,6 +327,69 @@ public class DistributedBoardgame {//singleton
 	public void setGetYutValuesAtOnce(boolean yutsAtOnce){
 		this.yutsAtOnce = yutsAtOnce;
 	}
+	
+	public void setYutsMajorityRule(boolean majorityRule){
+        this.majorityRule = majorityRule;
+    }
+	
+	public void setNumOfVirtualDice(int numOfVirtualDice){
+	    Log.i(TAG, "numOfVirtualDice 설정 진입");
+	    if(Mediator.getInstance().getMode() != Mode.HOST){
+	        Log.w(TAG, "호스트 인스턴스만이 setNumOfVirtualDice 메서드를 호출할 수 있습니다.");
+	        return;
+	    }
+	    if(DistributedBoardgame.getInstance().getState() != DistributedBoardgame.MIDDLE_OF_GAME){
+            Log.w(TAG, "게임이 시작된 다음 setNumOfVirtualDice 메서드를 불러주세요.");
+            return;
+        }
+	    
+	    Player[] players = this.getPlayers();
+	    this.getMe().setNumOfDice(numOfVirtualDice);
+	    for(int i = 0 ; i < players.length ; i++){
+	        players[i].setNumOfDice(numOfVirtualDice);
+	    }
+	}
+	
+	public void setNumOfVirtualYuts(int numOfVirtualYuts){
+        Log.i(TAG, "numOfVirtualYuts 설정 진입");
+        
+        if(Mediator.getInstance().getMode() != Mode.HOST){
+            Log.w(TAG, "호스트 인스턴스만이 setNumOfVirtualYuts 메서드를 호출할 수 있습니다.");
+            return;
+        }
+        
+        if(DistributedBoardgame.getInstance().getState() != DistributedBoardgame.MIDDLE_OF_GAME){
+            Log.w(TAG, "게임이 시작된 다음 setNumOfVirtualYuts 메서드를 불러주세요.");
+            return;
+        }
+        
+        Player[] players = this.getPlayers();
+        this.getMe().setNumOfYuts(numOfVirtualYuts);
+        for(int i = 0 ; i < players.length ; i++){
+            players[i].setNumOfYuts(numOfVirtualYuts);
+        }
+    }
+	
+	public void setNumOfVirtualMarkedYuts(int numOfVirtualMarkedYuts){
+        Log.i(TAG, "numOfVirtualMarkedYuts 설정 진입");
+        
+        if(Mediator.getInstance().getMode() != Mode.HOST){
+            Log.w(TAG, "호스트 인스턴스만이 setNumOfVirtualMarkedYuts 메서드를 호출할 수 있습니다.");
+            return;
+        }
+        
+        if(DistributedBoardgame.getInstance().getState() != DistributedBoardgame.MIDDLE_OF_GAME){
+            Log.w(TAG, "게임이 시작된 다음 setNumOfVirtualMarkedYuts 메서드를 불러주세요.");
+            return;
+        }
+        
+        Player[] players = this.getPlayers();
+        this.getMe().setNumOfMarkedYuts(numOfVirtualMarkedYuts);
+        for(int i = 0 ; i < players.length ; i++){
+            players[i].setNumOfMarkedYuts(numOfVirtualMarkedYuts);
+        }
+    }
+	
 
 	public boolean isGetDieValuesAtOnce(){
 	    return diceAtOnce;
@@ -318,6 +397,10 @@ public class DistributedBoardgame {//singleton
 	
 	public boolean isGetYutValuesAtOnce(){
 	    return yutsAtOnce;
+	}
+	
+	public boolean isYutsMajorityRuleApplied(){
+	    return majorityRule;
 	}
 	
 	/**

@@ -191,6 +191,7 @@ public class Player implements Serializable{
 	 * @param numOfDice 설정할 가상게임도구-주사위의 개수
 	 */
 	public void setNumOfDice(int numOfDice){
+	    DistributedBoardgame.getInstance().setNumOfDiceIntention(numOfDice);
 	    if(this.isThisPlayer()){
 	        EmulatorReceiver.getInstance().setNumberOfDice(numOfDice);
 	    }else{
@@ -203,12 +204,25 @@ public class Player implements Serializable{
 	 * @param numOfYuts
 	 */
 	public void setNumOfYuts(int numOfYuts){
+	    DistributedBoardgame.getInstance().setNumOfYutsIntention(numOfYuts);
 	    if(this.isThisPlayer()){
             EmulatorReceiver.getInstance().setNumberOfYuts(numOfYuts);
         }else{
             RequestReplyManager.getInstance().sendRequest(this, Request.SET_NUM_OF_YUT, numOfYuts);
         }
 	}
+	
+	/**
+     * 아직 지원하지 않는 메서드
+     * @param numOfMarkedYuts
+     */
+    public void setNumOfMarkedYuts(int numOfMarkedYuts){
+        if(this.isThisPlayer()){
+            EmulatorReceiver.getInstance().setNumberOfBackYut(numOfMarkedYuts);
+        }else{
+            RequestReplyManager.getInstance().sendRequest(this, Request.SET_NUM_OF_MARKED_YUT, numOfMarkedYuts);
+        }
+    }
 	
 	//static method
 	

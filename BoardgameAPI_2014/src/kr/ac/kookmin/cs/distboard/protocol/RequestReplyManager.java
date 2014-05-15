@@ -95,6 +95,10 @@ public class RequestReplyManager{
                     Log.d(TAG, "SET_NUM_OF_YUT로 판명");
                     EmulatorReceiver.getInstance().setNumberOfYuts((Integer)currentRequest.content);
                     break;
+				case Request.SET_NUM_OF_MARKED_YUT:
+                    Log.d(TAG, "SET_NUM_OF_MARKED_YUT로 판명");
+                    EmulatorReceiver.getInstance().setNumberOfBackYut((Integer)currentRequest.content);
+                    break;
 			}
 
 		}else if(message instanceof Reply){
@@ -105,6 +109,11 @@ public class RequestReplyManager{
 			case Reply.ROLL_DICE_RESULT:
 				Log.d(TAG, "ROLL_DICE_RESULT로 판명");
 				GameToolSystemManager.getInstance().onRemoteVirtualDiceRoll(player, (int[])currentReply.content);
+				break;
+			case Reply.ROLL_YUTS_RESULT:
+                Log.d(TAG, "ROLL_YUTS_RESULT로 판명");
+                GameToolSystemManager.getInstance().onRemoteVirtualYutsRoll(player, (int[])currentReply.content);
+                break;
 			}
 		}
 	}

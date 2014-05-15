@@ -336,7 +336,8 @@ public class CommunicationStateManager {
 		}
 		//2. 게임중
 		else if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME){
-			CommunicationStateManager.getInstance().onDicePlusLost(die);
+			//CommunicationStateManager.getInstance().onDicePlusLost(die);
+		    Log.i(TAG, "게임중 Diceplus 접속 끊어짐");
 			
 			//그리고 다시 재구성한다.
 		}
@@ -367,13 +368,13 @@ public class CommunicationStateManager {
 		Log.w(TAG, "전자 윷 구성 실패");//즉, 구성 타임아웃.
 	}
 	
-	public synchronized void onElectricYutConntected(BluetoothDevice device){
+	public void onElectricYutConntected(BluetoothDevice device){
 		//checkInitialized();
 				Log.i(TAG, "전자 윷 연결됨 : " + device.getAddress());
 				//두 가지 경우
 				//1. 구성중
 				if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE){
-					Log.i(TAG, "DICE+ 핸들러 보고 : 호스트 준비 모드");
+					Log.i(TAG, "전자윷 핸들러 보고 : 호스트 준비 모드");
 					Message message = Mediator.getInstance().getHandler().obtainMessage(AssistanceActivity.ESTABLISH_YUT_CONNECTED);
 					message.obj = device;
 					message.sendToTarget();

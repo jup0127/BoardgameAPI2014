@@ -600,7 +600,7 @@ public class AssistanceActivity extends Activity {
 				    
 					Log.i(TAG, "ÇÚµé·¯ ¸Þ½ÃÁö : ÀüÀÚ À· ¿¬°á ²÷±è");
 					Toast.makeText(getApplicationContext(), ((BluetoothDevice)msg.obj).getAddress() + "is disconnected", Toast.LENGTH_LONG).show();
-					yutButtons.get(lastYutActiveButtonIndex--).setBackgroundColor(Color.GRAY);
+					yutButtons.get(--lastYutActiveButtonIndex).setBackgroundColor(Color.GRAY);
 					break;
 					
 					
@@ -644,7 +644,7 @@ public class AssistanceActivity extends Activity {
 				    
 					Log.i(TAG, "ÇÚµé·¯ ¸Þ½ÃÁö : DICE+ ¿¬°á ²÷±è");
 					Toast.makeText(getApplicationContext(), ((Die)msg.obj).getAddress() + "is disconnected", Toast.LENGTH_LONG).show();
-					dicePlusButtons.get(lastDicePlusActiveButtonIndex--).setBackgroundColor(Color.GRAY);
+					dicePlusButtons.get(--lastDicePlusActiveButtonIndex).setBackgroundColor(Color.GRAY);
 					
 					break;
 					

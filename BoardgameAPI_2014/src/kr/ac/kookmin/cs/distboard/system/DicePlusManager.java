@@ -1,5 +1,6 @@
 package kr.ac.kookmin.cs.distboard.system;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import kr.ac.kookmin.cs.distboard.DistributedBoardgame;
@@ -38,6 +39,7 @@ public class DicePlusManager {
 	private int exactElectricGameToolDicePlus = 0;
 	private ArrayList<Die> dice = new ArrayList<Die>();
 	private ArrayList<Die> scaned = new ArrayList<Die>();//이미 검색되어 커넥트 시도했던 Die - 속도때문에 한번에 2개의 스캐닝된것 커넥트하는 문제 해결하기위함
+	private ArrayList<Die> losts = new ArrayList<Die>();
 	//연결끊어지면 scaned에서도 지워주자!!(다시 연결해야되니까.)
 	
 	DiceScanningListener scanningListener = new DiceScanningListener() {
@@ -47,9 +49,14 @@ public class DicePlusManager {
 			Log.d(TAG, "새로운 Dice+ : " + die.getAddress());
 			//dicePluses.add(die);
 			if(scaned.indexOf(die) == -1 && isTimeOuted == false && hasPerfectlyNominated == false){//기존에 접속 안된놈이면
-				Log.d(TAG, "기존 탐색 목록에 없던 Dice+ 판명: " + die.getAddress());
+				Log.d(TAG, "기존 탐색 목록에 없던 Dice+ 판명(준비모드): " + die.getAddress());
 				scaned.add(die);
 				DiceController.connect(die);
+			}
+			else if(scaned.indexOf(die) == -1 && isTimeOuted == false && hasPerfectlyNominated == true && DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME){//게임도중 기존에 접속 안된놈이면
+			    Log.d(TAG, "기존 탐색 목록에 없던 Dice+ 판명(게임도중): " + die.getAddress());
+			    scaned.add(die);
+			    DiceController.connect(die);
 			}
 		}
 		
@@ -57,8 +64,10 @@ public class DicePlusManager {
 		@Override
 		public synchronized void onScanStarted() {
 			Log.d(TAG, "스캔 시작됨");
-			if(isTimeOuted == true || hasPerfectlyNominated == true)
+			if((isTimeOuted == true || hasPerfectlyNominated == true) && DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE)//준비
 				BluetoothManipulator.cancelScan();
+			if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME && losts.size() == 0)//게임중
+                BluetoothManipulator.cancelScan();
 		}
 
 		@Override
@@ -73,9 +82,13 @@ public class DicePlusManager {
 			
 			//타임아웃 되지않았으면 다시시도
 			if(isTimeOuted == false && hasPerfectlyNominated == false){
-				Log.i(TAG, "리스캔 시도중");
+				Log.i(TAG, "리스캔 시도중(게임준비모드)");
 				BluetoothManipulator.startScan();
 			}
+			if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME && losts.size() == 0 ){
+                Log.i(TAG, "리스캔 시도중(게임중모드) losts.size() = " + losts.size());
+                BluetoothManipulator.startScan();
+            }
 			/*if (dice.size() != exactElectricGameToolDicePlus) {
 				Log.d(TAG, "Rescan Started");
 				BluetoothManipulator.startScan();
@@ -91,31 +104,58 @@ public class DicePlusManager {
 
 			// Signing up for roll events
 			if (dice.indexOf(die) == -1) {// 기존에 연결안된놈이면
-				dice.add(die);
-				CommunicationStateManager.getInstance().onDicePlusConnected(die);
+			    
+			    
+			    /**
+	             * 이미 FORCE 진행된 상태에서 접속시를정의함
+	             */
+			    if(hasPerfectlyNominated == true && DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE){
+	                
+			        DiceController.unsubscribeRolls(die);
+	                return;
+	            }
+			    
+                if (DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE) {
 
-				// 만약 모든 주사위가 모였으면 이제그만 스캔
-				if (dice.size() == exactElectricGameToolDicePlus && hasPerfectlyNominated == false) {
-					Log.i(TAG, "모든 Dice+ 연결 완료");
+                    dice.add(die);
+                    CommunicationStateManager.getInstance().onDicePlusConnected(die);
 
-					hasPerfectlyNominated = true;
-					BluetoothManipulator.cancelScan();
+                    // 만약 모든 주사위가 모였으면 이제그만 스캔
+                    if (dice.size() == exactElectricGameToolDicePlus
+                            && hasPerfectlyNominated == false) {
+                        Log.i(TAG, "모든 Dice+ 연결 완료");
 
-					//노미네이트로 바꿀 것
-					/*CommunicationStateManager.getInstance()
-							.onDicePlusEstablishComplete(
-									ArrayListConverter
-											.toDiceArrayListToArray(dice));*/
-					CandidateManager.getInstance().nominateDice(ArrayListConverter.toDiceArrayListToArray(dice));
-					
-					
+                        hasPerfectlyNominated = true;
+                        BluetoothManipulator.cancelScan();
 
-					// 구독 등록
-					for (int i = 0; i < dice.size(); i++) {
-						DiceController.subscribeRolls(dice.get(i));
-					}
-					Log.i(TAG, "모든 Dice+ 구독 등록 완료");
-				}
+                        // 노미네이트로 바꿀 것
+                        /*
+                         * CommunicationStateManager.getInstance()
+                         * .onDicePlusEstablishComplete( ArrayListConverter
+                         * .toDiceArrayListToArray(dice));
+                         */
+                        CandidateManager.getInstance().nominateDice(ArrayListConverter.toDiceArrayListToArray(dice));
+
+                        // 구독 등록
+                        for (int i = 0; i < dice.size(); i++) {
+                            DiceController.subscribeRolls(dice.get(i));
+                        }
+                        Log.i(TAG, "모든 Dice+ 구독 등록 완료(준비모드)");
+                    }
+                }else if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME){
+                    dice.add(die);
+                    
+                    if(losts.contains(die) == false){
+                        Log.w(TAG, "연결 주사위가 기존 끊어진 주사위 목록에 없음");
+                    }
+                    
+                    losts.remove(die);
+                    SubjectDeviceMapper.getInstance().replaceDie(die);
+                    BluetoothManipulator.cancelScan();
+                    DiceController.subscribeRolls(die);
+                    
+                    Log.i(TAG, "Dice+ 구독 등록 완료(게임중모드)");
+                }
 			}else{
 				//이미 존재하던 놈이면
 				// = 안되는데..
@@ -127,8 +167,8 @@ public class DicePlusManager {
 		public synchronized void onConnectionFailed(Die die, Exception e) {
 			Log.d(TAG, "연결 실패", e);
 			scaned.remove(die);
-			if(isTimeOuted == false)
-				BluetoothManipulator.startScan();
+			//if(isTimeOuted == false)
+				//BluetoothManipulator.startScan();
 		}
 
 		@Override
@@ -151,6 +191,13 @@ public class DicePlusManager {
 				}
 			}else if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME && initialized == true){//게임중에 끊겼다면
 			    Log.e(TAG, "게임중일때 DICE+ 접속 끊김.");
+			    dice.remove(die);
+                scaned.remove(die);
+                if(losts.indexOf(die) == -1){
+                    Log.i(TAG, "이미 연결이 끊어졋던 die가 아닙니다. 추가적인 중복 입력 오류가 발생하지 않았습니다.");
+                    losts.add(die);
+                }
+                BluetoothManipulator.startScan();
 			    CommunicationStateManager.getInstance().onDicePlusLost(die);
 			}
 			//BluetoothManipulator.startScan();
@@ -198,6 +245,7 @@ public class DicePlusManager {
 		exactElectricGameToolDicePlus = 0;
 		dice = new ArrayList<Die>();
 		scaned = new ArrayList<Die>();
+		losts = new ArrayList<Die>();
 		
 	}
 	

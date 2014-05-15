@@ -21,21 +21,31 @@ public class EmulatorReceiver extends BroadcastReceiver {
 
     private static final String TAG = "20083271:EmulatorReceiver";
     
+    
+    public static final int V_DICE = 0;
+    public static final int V_YUTS = 1;
+    
+    
     private static EmulatorReceiver instance = new EmulatorReceiver();
 
     private boolean initialized = false;
     
     private Context context = null;
     private String ableButton = "0";
-    private String diceNumber = "2";
+    private String diceNumber = "";
     private String setDiceNumber = "";
-    private String setYutNumber = "3";
-    private String setBackYutNumber = "1";
+    private String setYutNumber = "";
+    private String setBackYutNumber = "";
     private String itemType = "";
     private String activityName = "";
     private static IntentFilter filter = null;
     private String inputActivityName = "";
     private String packageName="";
+    
+    /**
+     * 온리시브에서 가상도구 구분용
+     */
+    private int vMode = -1;
 
     //presented methods
     
@@ -56,12 +66,14 @@ public class EmulatorReceiver extends BroadcastReceiver {
         setYutNumber = "3";
         activityName = "";
         setBackYutNumber = "1";
-        itemType = "";
+        itemType = "0";
         filter = new IntentFilter("android.intent.action.SUPER");
         inputActivityName = "";
         packageName=context.getPackageName();
+        vMode = -1;
         
         setNumberOfDice(DistributedBoardgame.getInstance().getNumOfDiceIntention());
+        setNumberOfYuts(DistributedBoardgame.getInstance().getNumOfYutsIntention());
         //윷추가할것
         
         setReceiver();
@@ -76,7 +88,14 @@ public class EmulatorReceiver extends BroadcastReceiver {
     }
     //type is 1 -> yut, type is 0 -> dice
     public void appear(int type) {
-        
+        if(type == 0){
+            vMode = EmulatorReceiver.V_DICE;
+        }else if(type == 1){
+            vMode = EmulatorReceiver.V_YUTS;
+        }else{
+            Log.e(TAG, "Unknown Type");
+            return;
+        }
         
         Log.i(TAG, "appear()호출");
         
@@ -112,6 +131,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
         
         intent.putExtra("itemType", itemType); // "紐낆묶", "�ㅼ젣媛�
         intent.putExtra("setDiceNumber", setDiceNumber); // "紐낆묶", "�ㅼ젣媛�
+        Log.e(TAG, "setYutNumber : " + setYutNumber);
         intent.putExtra("setYutNumber", setYutNumber); // "紐낆묶", "�ㅼ젣媛�
         intent.putExtra("setBackYutNumber", setBackYutNumber); // "紐낆묶", "�ㅼ젣媛�
         intent.putExtra("getPackageName", context.getPackageName()); // "紐낆묶",
@@ -163,16 +183,25 @@ public class EmulatorReceiver extends BroadcastReceiver {
     }
     //set dice number
     public void setNumberOfDice(int numOfDice) {
+        Log.i(TAG, "numOfDice : " + numOfDice);
         setDiceNumber = "" + numOfDice;
     }
     //set yut number
-    public void setNumberOfYut(int numOfYut) {
-        numOfYut = numOfYut - Integer.parseInt(setBackYutNumber);
-        setYutNumber = "" + numOfYut;
+    public void setNumberOfYuts(int numOfYuts) {
+        Log.i(TAG, "numOfYuts : " + numOfYuts);
+        numOfYuts = numOfYuts - Integer.parseInt(setBackYutNumber);
+        setYutNumber = "" + numOfYuts;
+        Log.e(TAG, "setYutNumber : " + setYutNumber);
+            
     }
     //set backYut number
     public void setNumberOfBackYut(int numOfBackYut) {
+        Log.i(TAG, "setNumberOfBackYut 부르는 중");
+        
+        setYutNumber = Integer.toString(Integer.parseInt(setYutNumber) + (Integer.parseInt(setBackYutNumber) - numOfBackYut));
         setBackYutNumber = "" + numOfBackYut;
+        Log.i(TAG, "setYutNumber = " + setYutNumber + "setBackYutNumber = " + numOfBackYut);
+        
     }
     //set emulator type
     //itemType "1" -> yut, "0" -> dice
@@ -180,9 +209,11 @@ public class EmulatorReceiver extends BroadcastReceiver {
         itemType = "" + type;
     }
     
+    public int getSetNumberOfBackYut(){
+        return Integer.parseInt(setBackYutNumber);
+    }
     
     //private methods
-    
     
     private int[] toToolDataArrayStringToPrimitiveValue(String rollValues) {
         // if itemType is yut(itemType=="1"), value 1 or 3 or 4 convert to 1 and 6 convert to 0
@@ -212,7 +243,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "onReceiver");
+        Log.d(TAG, "onReceive");
         // Intent intentGetDiceValue = new
         // Intent();//MainActivity.class.getIntent();
         diceNumber = intent.getExtras().getString("diceNumber");
@@ -222,8 +253,32 @@ public class EmulatorReceiver extends BroadcastReceiver {
         int[] resultValues = toToolDataArrayStringToPrimitiveValue(diceNumber);
         //GameToolData[] gameToolData = new GameToolData[resultValues.length];
         
-    
-        GameToolSystemManager.getInstance().onLocalVirtualDiceRoll(resultValues);
+        /**
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 주사위 경우의 onReceive인데 윷인 경우도 필요하다.
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 
+         */
+        
+        if(vMode == EmulatorReceiver.V_DICE){
+            Log.d(TAG, "vMode == EmulatorReceiver.V_DICE");
+            GameToolSystemManager.getInstance().onLocalVirtualDiceRoll(resultValues);
+        }else if(vMode == EmulatorReceiver.V_YUTS){
+            Log.d(TAG, "vMode == EmulatorReceiver.V_YUTS");
+            GameToolSystemManager.getInstance().onLocalVirtualYutsRoll(resultValues);
+        }else{
+            Log.e(TAG, "Unknown Type");
+        }
         
         
         
@@ -231,6 +286,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
 
     }
     
+    //재기능못함
     private void finishActivity() {
         Log.i(TAG, "finishActivity 진입 : " + packageName);
         if(packageName.equals("") == true)
@@ -241,6 +297,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
         Log.i(TAG, "끄기 완료?!");
         
     }
+    
     public void existUnityDice(){
         Log.i(TAG, "에뮬레이터 어플 확인");  
         Intent packageIntent = new Intent(); 
@@ -254,13 +311,16 @@ public class EmulatorReceiver extends BroadcastReceiver {
             context.startActivity(uriIntent);
     }
 }
+    
     public synchronized void clear(){
         
         Log.i(TAG, "에뮬레이터 클리어 진입");
         initialized = false;
         unSetReceiver();
         
-        finishActivity();
+        
+        //아직 재기능못함
+        //finishActivity();
     }
     
 }

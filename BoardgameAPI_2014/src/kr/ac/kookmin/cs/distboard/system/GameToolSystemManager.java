@@ -37,6 +37,7 @@ public class GameToolSystemManager {
 	//낮은 수준의 장치 리스트
 	private ArrayList<GameToolData> tempDiceGameToolDatas = new ArrayList<GameToolData>();
 	private ArrayList<GameToolData> tempYutGameToolDatas = new ArrayList<GameToolData>();
+	private Thread majorityRuleImplThread = null;
 	
 	private GameToolSystemManager(){
 		
@@ -53,6 +54,7 @@ public class GameToolSystemManager {
 		//yutsAtOnceCounter = 0;
 		tempDiceGameToolDatas = new ArrayList<GameToolData>();
 		tempYutGameToolDatas = new ArrayList<GameToolData>();
+		majorityRuleImplThread = null;
 	}
 	
 	public void checkInitialized(){
@@ -95,14 +97,52 @@ public class GameToolSystemManager {
             /**
              * 중복검사 필요(한 주사위 두번던지기 방지)
              */
-            tempYutGameToolDatas.add(new GameToolData(face, null));
+            if(DistributedBoardgame.getInstance().isYutsMajorityRuleApplied() == false){
+                tempYutGameToolDatas.add(new GameToolData(face, null));
             
-            //모든 주사위가 굴려졌다면
-            if(tempYutGameToolDatas.size() == DistributedBoardgame.getInstance().getNumOfYutsIntentin()){
-                GameTool.getGameToolListener().onYutRolls(null, ArrayListConverter.gameToolDataArrayListToArray(tempYutGameToolDatas));
-                tempYutGameToolDatas.clear();
+                //모든 주사위가 굴려졌다면
+                if(tempYutGameToolDatas.size() == DistributedBoardgame.getInstance().getNumOfYutsIntention()){
+                    GameTool.getGameToolListener().onYutRolls(null, ArrayListConverter.gameToolDataArrayListToArray(tempYutGameToolDatas));
+                    tempYutGameToolDatas.clear();
+                }
+            }else if(DistributedBoardgame.getInstance().isYutsMajorityRuleApplied() == true){
+                
+                synchronized (this) {
+
+                    if (tempYutGameToolDatas.size() == 0) {// 첫 번째 주사위이면
+                        if (majorityRuleImplThread == null) {
+                            majorityRuleImplThread = new Thread() {
+
+                                @Override
+                                public void run() {
+                                    try {
+                                        sleep(1800);
+                                    } catch (InterruptedException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                    }
+                                }
+                            };
+                        }
+                    }
+                    tempYutGameToolDatas.add(new GameToolData(face, null));
+                }
             }
         }
+	}
+	
+	public void preCheckYutsWithMajorityRule(){
+	    
+	    
+	    
+	}
+	
+	public void postCheckYutsWithMajorityRule(){
+	    if(tempYutGameToolDatas.size() == DistributedBoardgame.getInstance().getNumOfYutsIntention()){
+            GameTool.getGameToolListener().onYutRolls(null, ArrayListConverter.gameToolDataArrayListToArray(tempYutGameToolDatas));
+        }
+        
+        tempYutGameToolDatas.clear();
 	}
 	
 	public void onLocalVirtualDiceRoll(int[] face){//rollData의 안에 많은 데이터가 잇는것을 감안해 많은 데이터가 인자로 올 예정
@@ -126,11 +166,32 @@ public class GameToolSystemManager {
 		Log.i(TAG, "로컬 가상 주사위 굴려짐 메서드 끝남");
 	}
 	
+	public void onLocalVirtualYutsRoll(int[] face){//rollData의 안에 많은 데이터가 잇는것을 감안해 많은 데이터가 인자로 올 예정
+        
+        Log.i(TAG, "로컬 가상 윷가락 굴려짐");
+        
+        //로컬이 호스트
+        if(DistributedBoardgame.getInstance().getMode() == Mode.HOST){
+            onRemoteVirtualYutsRoll(DistributedBoardgame.getInstance().getMe(), face);
+            return;
+        }
+        
+        //아니면 호스트로 전송
+        Log.i(TAG, "클라이언트라면 호스트로 가상 윷가락값 배열 전송 : " + DistributedBoardgame.getInstance().getMode());
+        
+        if(DistributedBoardgame.getInstance().getMode() == Mode.CLIENT)
+            RequestReplyManager.getInstance().sendReply(DistributedBoardgame.getInstance().getHost(), Reply.ROLL_YUTS_RESULT, face);
+        
+        Log.d(TAG, "가상 윷가락값 배열 전송 완료"); 
+        
+        Log.i(TAG, "로컬 가상 윷가락 굴려짐 메서드 끝남");
+    }
+	
 	public void onRemoteVirtualDiceRoll(Player player, int[] face){
-		Log.i(TAG, "리모트 가상 주사위 굴려짐 주사위 길이는: " + face.length);
+		Log.i(TAG, "리모트 가상 주사위 굴려짐 길이는: " + face.length);
 		//클라이언트에서 온거니까(호스트 일 수도 있어)
 		//적절히 처리후 게임툴 리스너 작동
-		if(DistributedBoardgame.getInstance().isGetDieValuesAtOnce() == false){//한번에 처리해야되는 상황이 아니면
+		if(DistributedBoardgame.getInstance().isGetYutValuesAtOnce() == false){//한번에 처리해야되는 상황이 아니면
 			//바로 보고
 			Log.d(TAG, "따로 처리하는 상황");
 			for(int i = 0 ; i < face.length ; i++){
@@ -139,17 +200,58 @@ public class GameToolSystemManager {
 		}else{//한번에 처리해야되는 상황이면
 			Log.d(TAG, "한번에 처리하는 상황");
 			/**
-			 * 중복검사 필요(한 주사위 두번던지기 방지)
+			 * 중복검사 필요(한 윷가락 두번던지기 방지)
 			 */
+			
 			for(int i = 0 ; i < face.length ; i++){
 				tempDiceGameToolDatas.add(new GameToolData(face[i], player));
 			}
 			
 			//모든 주사위가 굴려졌다면
-			if(tempDiceGameToolDatas.size() == DistributedBoardgame.getInstance().getNumOfDiceIntention()){
+			if( tempDiceGameToolDatas.size() == DistributedBoardgame.getInstance().getNumOfDiceIntention()){
+			    
 				GameTool.getGameToolListener().onDiceRolls(player, ArrayListConverter.gameToolDataArrayListToArray(tempDiceGameToolDatas));
 				tempDiceGameToolDatas.clear();
 			}
 		}
 	}
+	
+	public void onRemoteVirtualYutsRoll(Player player, int[] face){
+        Log.i(TAG, "리모트 가상 윷가락 굴려짐 길이는: " + face.length);
+        //클라이언트에서 온거니까(호스트 일 수도 있어)
+        //적절히 처리후 게임툴 리스너 작동
+        if(DistributedBoardgame.getInstance().isGetYutValuesAtOnce() == false){//한번에 처리해야되는 상황이 아니면
+            //바로 보고
+            Log.d(TAG, "따로 처리하는 상황");
+            for(int i = 0 ; i < face.length ; i++){
+                GameToolData tempGameToolData = new GameToolData(face[i], player);
+                if(i >= face.length - EmulatorReceiver.getInstance().getSetNumberOfBackYut() ){
+                    tempGameToolData.setIsMarked(true);
+                }
+                GameTool.getGameToolListener().onYutRoll(player, tempGameToolData);
+            }
+        }else{//한번에 처리해야되는 상황이면
+            Log.d(TAG, "한번에 처리하는 상황");
+            /**
+             * 중복검사 필요(한 윷가락 두번던지기 방지)
+             */
+            for(int i = 0 ; i < face.length ; i++){
+                GameToolData tempGameToolData = new GameToolData(face[i], player);
+                if(i >= face.length - EmulatorReceiver.getInstance().getSetNumberOfBackYut() ){
+                    tempGameToolData.setIsMarked(true);
+                }
+                tempYutGameToolDatas.add(tempGameToolData);
+                
+            }
+            
+            //모든 윷가락이 굴려졌다면
+            if( tempYutGameToolDatas.size() == DistributedBoardgame.getInstance().getNumOfYutsIntention()){//무조껀 true가 되야할 듯??..
+               
+                
+                
+                GameTool.getGameToolListener().onYutRolls(player, ArrayListConverter.gameToolDataArrayListToArray(tempYutGameToolDatas));
+                tempYutGameToolDatas.clear();
+            }
+        }
+    }
 }

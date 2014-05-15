@@ -19,6 +19,8 @@ public class GameToolData implements Serializable{
 	 */
 	private int face = 0;
 	
+	private boolean isMarked = false;
+	
 	/**
 	 * 게임도구의 근원 플레이어 
 	 */
@@ -50,6 +52,14 @@ public class GameToolData implements Serializable{
 	 */
 	public Player getSource() {
 		return source;
+	}
+	
+	public void setIsMarked(boolean isMarked){
+	    this.isMarked = isMarked;
+	}
+	
+	public boolean isMarked(){
+	    return isMarked;
 	}
 	
 }

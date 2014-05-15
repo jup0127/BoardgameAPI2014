@@ -188,7 +188,8 @@ public class ElectricYutManager {
 		
 		hasPerfectlyNominated = true;
 		bluetoothAdapter.cancelDiscovery();
-		clear();
+		
+		//clear();
 		CandidateManager.getInstance().nominateYutDevices(new BluetoothDevice[0]);
 		
 		CommunicationStateManager.getInstance().onElectricYutEstablishForceComplete();
@@ -206,7 +207,7 @@ public class ElectricYutManager {
 		for(int i = 0 ; i < connectedThreads.size() ; i++){
 			if(connectedThreads.get(i) != null){
 				if(connectedThreads.get(i).getRemoteDevice().equals(device) == true){
-					Log.i(TAG, "장치로 스레드얻기 완료 스레드안의 장치는 : " + connectedThreads.get(i).getRemoteDevice().getName());
+					Log.i(TAG, "장치로 스레드얻기 완료 스레드안의 장치는 : " + connectedThreads.get(i).getRemoteDevice().getAddress());
 					return connectedThreads.get(i);
 				}
 			}else{
@@ -220,10 +221,14 @@ public class ElectricYutManager {
 	}
 	
 	public synchronized void write(BluetoothDevice device, byte[] bytes){
-	    if(getConnectedElectricYutThreadOf(device) instanceof ConnectedElectricYutThread)
+	    if(getConnectedElectricYutThreadOf(device) instanceof ConnectedElectricYutThread){
+	        Log.i(TAG, ((ConnectedElectricYutThread)getConnectedElectricYutThreadOf(device)).getRemoteDevice().getAddress() + "에 쓰는중");
             ((ConnectedElectricYutThread)getConnectedElectricYutThreadOf(device)).write(bytes);
-        else
+	    }
+        else{
             Log.e(TAG, "해당 장치에 Object를 기록할 수 없습니다.");
+	
+        }
 	}
 	
 	public synchronized void clear(){
@@ -255,8 +260,9 @@ public class ElectricYutManager {
 	//private 메서드, 클래스
 	
 	
-	private void onNewElectricYut(BluetoothDevice device){
+	private synchronized void onNewElectricYut(BluetoothDevice device){
 		Log.i(TAG, "새로운 전자 윷 발견");
+		Log.i(TAG, "3가지 값 : " + scaned.indexOf(device) + " " + isTimeOuted + " " + hasPerfectlyNominated);
 		if(scaned.indexOf(device) == -1 && isTimeOuted == false && hasPerfectlyNominated == false){
 			Log.d(TAG, "기존 탐색 목록에 없던 전자 윷 판명" + device.getName() + " " + device.getAddress());
 			scaned.add(device);
@@ -264,7 +270,7 @@ public class ElectricYutManager {
 		}
 	}
 	
-	private void onDiscoverFinished(){
+	private synchronized void onDiscoverFinished(){
 		if(isTimeOuted == false && hasPerfectlyNominated == false){
 		    if(bluetoothAdapter.isDiscovering())
 		        bluetoothAdapter.cancelDiscovery();
@@ -281,37 +287,63 @@ public class ElectricYutManager {
 		currentConnectingThread.start();
 	}
 	
-	private synchronized void onConnected(DeviceType deviceType, BluetoothSocket socket, BluetoothDevice device){
+	private void onConnected(DeviceType deviceType, BluetoothSocket socket, BluetoothDevice device){
 		Log.i(TAG, "연결됨 : " + device.getName());
 		
 		if(yuts.indexOf(device) == -1){
-			yuts.add(device);
-			connectedThreads.add(new ConnectedElectricYutThread(socket));
-			connectedThreads.get(connectedThreads.size() - 1 ).start();
-			
-			CommunicationStateManager.getInstance().onElectricYutConntected(device);
-			
-			if(yuts.size() == exactElectricGameToolYut && hasPerfectlyNominated == false){
-				Log.i(TAG, "모든 전자 윷 연결 완료");
-				
-				hasPerfectlyNominated = true;
-				
-				bluetoothAdapter.cancelDiscovery();
-				
-				CandidateManager.getInstance().nominateYutDevices(ArrayListConverter.bluetoothDeviceArrayListToArray(yuts));
-				
-				for(int i = 0; i < yuts.size() ; i++){
-					//구독등록!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				    byte[] bytes = new byte[2];
-				    bytes[0] = REQUEST_SUBSCRIBE_HEADER;
-				    bytes[1] = DUMMY;
-				    Log.i(TAG, "윷 구독 등록중 : " + yuts.get(i).getAddress() + " " + bytes);
-				    ElectricYutManager.getInstance().write(device, bytes);
-				}
-				
-				Log.i(TAG ,"모든 전자 윷 구독 등록 완료");
-				
-			}
+		    
+		    /**
+		     * 이미 FORCE 진행된 상태에서 접속시를정의함
+		     */
+		    
+		    if(hasPerfectlyNominated == true && DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE){
+		        try {
+                    socket.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+		        return;
+		    }
+		    
+		    
+            if (DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE) {
+                yuts.add(device);
+                connectedThreads.add(new ConnectedElectricYutThread(socket));
+                connectedThreads.get(connectedThreads.size() - 1).start();
+                Log.i(TAG, "기존에 없던 전자윷 연결됨");
+                CommunicationStateManager.getInstance()
+                        .onElectricYutConntected(device);
+
+                if (yuts.size() == exactElectricGameToolYut
+                        && hasPerfectlyNominated == false) {
+                    Log.i(TAG, "모든 전자 윷 연결 완료");
+
+                    hasPerfectlyNominated = true;
+
+                    bluetoothAdapter.cancelDiscovery();
+
+                    CandidateManager.getInstance().nominateYutDevices(
+                            ArrayListConverter
+                                    .bluetoothDeviceArrayListToArray(yuts));
+
+                    for (int i = 0; i < yuts.size(); i++) {
+                        // 구독등록!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        byte[] bytes = new byte[2];
+                        bytes[0] = REQUEST_SUBSCRIBE_HEADER;
+                        bytes[1] = DUMMY;
+                        Log.i(TAG, "윷 구독 등록중 : " + yuts.get(i).getAddress()
+                                + " " + bytes);
+                        ElectricYutManager.getInstance().write(yuts.get(i),
+                                bytes);
+                    }
+
+                    Log.i(TAG, "모든 전자 윷 구독 등록 완료");
+
+                }
+            }else if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME){
+                Log.i(TAG, "게임도중 연결된 윷");
+            }
 		}else{
 			Log.e(TAG, "이미 연결된 전자 윷");
 		}
@@ -319,10 +351,11 @@ public class ElectricYutManager {
 	
 	private synchronized void onConnectionLost(ConnectedElectricYutThread connectedElectricYutThread){
 		Log.i(TAG, "연결 끊어짐 : " + connectedElectricYutThread.getRemoteDevice().getName());
+		Log.i(TAG, "현재 진행 상태 : " + DistributedBoardgame.getInstance().getState());
 		
 		CommunicationStateManager.getInstance().onElectricYutLost(connectedElectricYutThread.getRemoteDevice());
 		
-		if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE || initialized == true){
+		if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.HOST_PREPARE_MODE && initialized == true){
 			Log.i(TAG, "구성중 연결 끊어진 것으로 판명");
 			hasPerfectlyNominated = false;
 			scaned.remove(connectedElectricYutThread.getRemoteDevice());
@@ -333,12 +366,13 @@ public class ElectricYutManager {
 			if(bluetoothAdapter.isDiscovering())
 				bluetoothAdapter.cancelDiscovery();
 			bluetoothAdapter.startDiscovery();
+			
 		}else if(DistributedBoardgame.getInstance().getState() == DistributedBoardgame.MIDDLE_OF_GAME && initialized == true){
 			Log.i(TAG, "게임중에 전자윷 끊어짐");
 		}
 	}
 	
-	private synchronized void onConnectionFailed(ConnectElectricYutThread connectElectricYutThread){
+	private void onConnectionFailed(ConnectElectricYutThread connectElectricYutThread){
 		Log.d(TAG, "연결실패 : " + connectElectricYutThread.getRemoteDevice().getName());
 		
 		scaned.remove(connectElectricYutThread.getRemoteDevice());
@@ -383,9 +417,9 @@ public class ElectricYutManager {
 			Log.i(TAG, "BEGIN mConnectThread");
 
 			try {
-				synchronized (ElectricYutManager.this) {
+				//synchronized (ElectricYutManager.this) {
 					mmSocket.connect();
-				}
+				//}
 			} catch (IOException e) {
 				// Close the socket
 				try {
@@ -398,7 +432,7 @@ public class ElectricYutManager {
 				return;
 			}
 
-			synchronized (ElectricYutManager.this) {
+			//synchronized (ElectricYutManager.this) {
 				Log.i(TAG, "연결 성공");
 				
 				//나중에 재합류할 때 사용할 정보 저장
@@ -411,7 +445,7 @@ public class ElectricYutManager {
 					Log.w(TAG, "소켓이 null입니다.");
 				
 				onConnected(DeviceType.ELECTRIC_GAME_TOOL, mmSocket, mmDevice);//상대방은 호스트		
-			}
+			//}
 		}
 
 		public BluetoothDevice getRemoteDevice() {
@@ -555,6 +589,11 @@ public class ElectricYutManager {
 					Log.i(TAG, "이미 페어링됨 : " + device.getName() + "(" + device.getAddress() + ")");
 				}else if(device.getBondState() != BluetoothDevice.BOND_BONDED){
 					Log.i(TAG, "새로운 장치 : " + device.getName() + "(" + device.getAddress() + ")");
+				}
+				
+				if(device.getName() == null){
+				    Log.w(TAG, "페어링되지 않은 장치 발견:" + device.getAddress());
+				    return;
 				}
 				
 				if(device.getName().equals("Ibar")){

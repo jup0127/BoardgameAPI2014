@@ -28,7 +28,7 @@ public class ClientManager {// 싱글톤
 
 	
 	
-	private final static String TAG = "20083271:BluetoothManager";
+	private final static String TAG = "20083271:ClientManager";
 	private final static boolean PRINT_DEBUG_STATUS = false;
 	private static int total_connection_id_for_debug = 0;
 	
@@ -159,6 +159,8 @@ public class ClientManager {// 싱글톤
 		connectIndexAsClient = -1;
 		underCommunicationHost = null;
 		connectingHost = null;
+		
+		hasClientsPerfectlyNominated = false;
 
 		Log.i(TAG, "블루투스 매니저가 초기화되었습니다 : " + mode);
 	}
@@ -322,7 +324,7 @@ public class ClientManager {// 싱글톤
 	// 예를들어 최소2명 최대4명인 게임에서 3명접속시 게임하고싶을때 이 메서드가 호출되고 게임은 3명이 진행하는거로 설정된다.
 	// 이메서드 이후에 getDevices() 호출하면 클라이언트는 3칸짜리 배열이겟지
 	public void forceClientEstablishment() {
-	    Log.i(TAG, "클라이언트 강제 구성 진입");
+	    Log.i(TAG, "클라이언트 강제 구성 진입 hasClientsPerfectlyNominated : " + hasClientsPerfectlyNominated);
 	    
 		if(hasClientsPerfectlyNominated == false){
 			
@@ -334,9 +336,10 @@ public class ClientManager {// 싱글톤
 					mConnectedThreads.remove(i);
 				}
 			}
-			
+			Log.i(TAG, "수락 스레드 취소직전");
 			mAcceptThread.cancel();
 			
+			Log.i(TAG, "클라이언트 수 강제 조작");
 			maxClients = mConnectedThreads.size();//클라이언트 수 강제 조작	
 			//////////////////////////////////////////////////////////////
 			

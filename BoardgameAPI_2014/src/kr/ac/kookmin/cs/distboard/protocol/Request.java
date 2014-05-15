@@ -38,6 +38,7 @@ public class Request implements Serializable{
 	
 	public static final int SET_NUM_OF_DICE = 14;
 	public static final int SET_NUM_OF_YUT = 15;
+	public static final int SET_NUM_OF_MARKED_YUT = 16;
 	
 	public int code = -1;
 	public Object content = null;
