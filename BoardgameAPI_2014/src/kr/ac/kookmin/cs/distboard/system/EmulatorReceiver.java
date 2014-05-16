@@ -131,7 +131,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
         
         intent.putExtra("itemType", itemType); // "紐낆묶", "�ㅼ젣媛�
         intent.putExtra("setDiceNumber", setDiceNumber); // "紐낆묶", "�ㅼ젣媛�
-        Log.e(TAG, "setYutNumber : " + setYutNumber);
+        //Log.e(TAG, "setYutNumber : " + setYutNumber);
         intent.putExtra("setYutNumber", setYutNumber); // "紐낆묶", "�ㅼ젣媛�
         intent.putExtra("setBackYutNumber", setBackYutNumber); // "紐낆묶", "�ㅼ젣媛�
         intent.putExtra("getPackageName", context.getPackageName()); // "紐낆묶",
