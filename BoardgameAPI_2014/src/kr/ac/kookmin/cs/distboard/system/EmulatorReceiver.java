@@ -142,8 +142,9 @@ public class EmulatorReceiver extends BroadcastReceiver {
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         intent.setComponent(compName);
 
+        Log.i(TAG, "유니티 부르기 직전");
         context.startActivity(intent);
-        
+        Log.i(TAG, "유니티 부르고 난 후");
         
     }
 
