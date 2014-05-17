@@ -165,7 +165,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
         
         
         context.sendBroadcast(intentSk);
-        
+        unSetReceiver();
         
     }
 
