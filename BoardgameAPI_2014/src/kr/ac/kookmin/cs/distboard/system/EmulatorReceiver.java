@@ -76,7 +76,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
         setNumberOfYuts(DistributedBoardgame.getInstance().getNumOfYutsIntention());
         //윷추가할것
         
-        setReceiver();
+        
         
     }
     
@@ -96,7 +96,7 @@ public class EmulatorReceiver extends BroadcastReceiver {
             Log.e(TAG, "Unknown Type");
             return;
         }
-        
+        setReceiver();
         Log.i(TAG, "appear()호출");
         
         if(initialized == false){
